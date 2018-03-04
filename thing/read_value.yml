@@ -1,10 +1,9 @@
 provider:
   name: faas
-  prefix: read
   gateway: http://localhost:8080
 
 functions:
   read_value:
     lang: node
-    handler: ./read_value
-    image: duarte/read
+    handler: ./thing/read_value
+    image: thing/read

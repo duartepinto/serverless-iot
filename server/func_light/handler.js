@@ -7,15 +7,30 @@
 const express = require('express')
 const app = express()
 
-function handle(req) {
-    var value = req.value;
+function handle(callback, context) {
+    var data = {}
+    if(callback == undefined || callback == null){
+        data.status= "error"
+        console.info(JSON.stringify(data))
+        //callback(undefined, data)
+    }
 
-    if(value == true)
-        console.log("The light is ON")
-    else
-        console.log("The light is OFF")
+    var request = JSON.parse(callback)
+    var value = request.value;
+
+    if(value == true){
+        data.status = "The light is ON"
+        console.log(JSON.stringify(data))
+        //callback(undefined, data)
+    }
+    else{
+        data.status = "The light is OFF"
+        console.log(JSON.stringify(data))
+        //callback(undefined, data)
+    }
+    return
 }
 
-module.exports = (req) => {
-    handle(req)
+module.exports = (callback, context) => {
+    handle(callback, context)
 }

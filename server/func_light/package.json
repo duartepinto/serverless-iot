@@ -5,7 +5,8 @@
   "main": "handler.js",
   "scripts": {
     "test": "node test.js",
-    "server": "node test.js --server"
+    "server": "node test.js --server",
+    "start": "node handler.js"
   },
   "keywords": [],
   "author": "",

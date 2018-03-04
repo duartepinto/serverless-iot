@@ -17,10 +17,11 @@ if(args.server == true){
         console.log('Example app listening on port 3000!');
     });
 }else{
-    handler(args)
+    var req = args.d 
+    handler(req)
 }
 
 app.get('/', function (req, res) {
-    handler(req)
+    handler(req, res)
 });
 
