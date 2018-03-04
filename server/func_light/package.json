@@ -1,0 +1,19 @@
+{
+  "name": "function",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "node test.js",
+    "server": "node test.js --server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "run-func": "^1.0.2"
+  }
+}

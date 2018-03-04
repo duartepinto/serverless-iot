@@ -1,0 +1,9 @@
+provider:
+  name: faas
+  gateway: http://localhost:8080
+
+functions:
+  server/func_light:
+    lang: node
+    handler: ./server/func_light
+    image: server/func_light
