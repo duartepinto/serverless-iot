@@ -11,6 +11,6 @@ function handle(req) {
     console.log('Hello! You said:', req)
 }
 
-module.exports = (req) => {
-    handle(req)
+module.exports = (req,res) => {
+    handle(req,res)
 }

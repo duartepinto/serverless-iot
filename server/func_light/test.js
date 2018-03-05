@@ -24,4 +24,3 @@ if(args.server == true){
 app.get('/', function (req, res) {
     handler(req, res)
 });
-
