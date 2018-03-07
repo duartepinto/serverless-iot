@@ -1,0 +1,9 @@
+provider:
+  name: faas
+  gateway: http://localhost:8080
+
+functions:
+  server/func_obese_heavy:
+    lang: node
+    handler: ./server/func_obese_heavy
+    image: server/func_obese_heavy

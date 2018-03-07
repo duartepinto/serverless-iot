@@ -1,0 +1,9 @@
+provider:
+  name: faas
+  gateway: http://localhost:8080
+
+functions:
+  server/func_super_heavy:
+    lang: node
+    handler: ./server/func_super_heavy
+    image: server/func_super_heavy

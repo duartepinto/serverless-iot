@@ -12,11 +12,19 @@ function handle(req, res) {
     if(req == undefined || req == null){
         data.status= "error"
         console.info(JSON.stringify(data))
-        //callback(undefined, data)
     }
 
-    var request = JSON.parse(req)
-    var value = request.value;
+    var request
+    var value 
+
+    try{
+        request = JSON.parse(req)
+        value = request.value;
+    }catch (err) {
+        data.status= "error"
+        console.info(JSON.stringify(data))
+        return 
+    }
 
     if(value == true){
         data.status = "The light is ON"

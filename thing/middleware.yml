@@ -3,7 +3,7 @@ provider:
   gateway: http://localhost:8080
 
 functions:
-  read_value:
+  middleware:
     lang: node
-    handler: ./thing/read_value
-    image: thing/read
+    handler: ./thing/middleware
+    image: thing/middleware
