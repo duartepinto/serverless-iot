@@ -33,7 +33,7 @@ function handle(req) {
         reqData = request.data
 
         for(var i = 0; i < funcsConfig.length; i++) {
-            if(reqFunc == funcsConfig[i].function){
+            if(reqFunc == funcsConfig[i].name){
                 func = funcsConfig[i]
                 break
             }
@@ -43,19 +43,18 @@ function handle(req) {
         }
     }catch (err) {
         data.status= "error"
-        data.message = "Error parsing json - " + err
+        data.message = "" + err
         console.info(JSON.stringify(data))
         return 
     }
 
-    return functionDeployed(func)
+    console.log(functionDeployed(func))
 }
 
 // This function needs to be atomic (or at least guarantee consistency)
 function functionDeployed(func){
     var currentLoad = getCurrentLoad()
-    
-    if(currentLoad + func.weight < rigConfigs.maxWeight && increaseCurrentLoad(func.weight)){
+    if(currentLoad + func.weight < rigConfigs.maxCapacity && increaseCurrentLoad(func.weight)){
         return true
     }else{
         return false

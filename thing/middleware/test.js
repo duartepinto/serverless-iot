@@ -17,7 +17,7 @@ if(args.server == true){
         console.log('Example app listening on port 3000!');
     });
 }else{
-    var req = args
+    var req = args.d
     handler(req)
 }
 

@@ -1,18 +1,18 @@
 [
     {
-        "function": "server/func_light",
+        "name": "server/func_light",
         "weight": "10"
     },
     {
-        "function": "server/func_heavy",
+        "name": "server/func_heavy",
         "weight": "100"
     },
     {
-        "function": "server/func_super_heavy",
+        "name": "server/func_super_heavy",
         "weight": "1000"
     },
     {
-        "function": "server/func_obese_heavy",
+        "name": "server/func_obese_heavy",
         "weight": "9007199254740991"
     }
 ]
