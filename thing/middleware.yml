@@ -7,3 +7,9 @@ functions:
     lang: node
     handler: ./thing/middleware
     image: thing/middleware
+    build:
+        extra-files:
+            from: ./thing/middleware/my_functions.json
+            to: /home/app/function/my_functions.json 
+            from: ./thing/middleware/my_rig_config.json
+            to: /home/app/function/my_rig_config.json 

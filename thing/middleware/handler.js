@@ -5,13 +5,16 @@
 'use strict';
 
 const express = require('express')
+const request = require('request')
 const app = express()
 
-import funcsConfig from './my_functions.json'
-import rigConfigs from './my_rig_config.json'
 
-const serverUrl = 'http://'
-const localUrl = 'http://127.0.0.1'
+const funcsConfig = require('./my_functions.json')
+const rigConfigs = require('./my_rig_config.json')
+
+var reqFunc
+var reqData
+var func  
 
 function handle(req) {
     var data = {}
@@ -22,15 +25,11 @@ function handle(req) {
         return
     }
 
-    var request
-    var reqFunc
-    var reqData
 
-    var func  
     try{
-        request = JSON.parse(req)
-        reqFunc  = request.func;
-        reqData = request.data
+        req = JSON.parse(req)
+        reqFunc  = req.func;
+        reqData = req.data
 
         for(var i = 0; i < funcsConfig.length; i++) {
             if(reqFunc == funcsConfig[i].name){
@@ -47,8 +46,47 @@ function handle(req) {
         console.info(JSON.stringify(data))
         return 
     }
+    var url
+    var isLocal = functionDeployed(func)
+    if(functionDeployed(func)){
+        makeLocalRequest(func.address, reqData)
+    }else{
+        makeCloudRequest(func.address, reqData)
+    }
 
-    console.log(functionDeployed(func))
+}
+
+function makeLocalRequest(functionAddress, reqData){
+    var url = rigConfigs.localUrl + ":" + rigConfigs.localPort
+    url += "/" + functionAddress
+    request.post({url,json: reqData}, responseLocal)
+}
+
+function makeCloudRequest(functionAddress, reqData){
+    var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
+    url += "/" + functionAddress
+    
+    //TODO REMOVE THIS
+    var data = {}
+    data.status = "This ran on the server. Hurray?"
+    console.info(JSON.stringify(data))
+    return
+
+    request.post({url,json: reqData}, responseCloud)
+     
+}
+
+function responseLocal(err,httpResponse, body){
+    console.info(body)
+}
+
+function responseCloud(err,httpResponse, body){
+    if(err != undefined){
+        console.info(body)
+        return
+    }else{
+        makeLocalRequest(func.address, reqData)
+    }
 }
 
 // This function needs to be atomic (or at least guarantee consistency)

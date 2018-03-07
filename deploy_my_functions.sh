@@ -7,9 +7,11 @@ cp ./my_rig_config.json ./thing/middleware/
 
 #BUILD FUNCTIONS
 sudo faas-cli build -f server/func_light.yml
+sudo faas-cli build -f thing/middleware.yml
 #sudo faas-cli build -f thing/read_value.yml
 
 
 #DEPLOY FUNCTIONS
 faas-cli deploy -f server/func_light.yml
+faas-cli deploy -f thing/middleware.yml
 #faas-cli deploy -f thing/read_value.yml
