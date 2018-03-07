@@ -8,4 +8,13 @@ $ git clone https://github.com/openfaas/faas && \
   ./deploy_stack.sh && \
   cd ..
 ```
-2. 
+
+2. Template for `my_rig_config.json`
+
+``` json
+{
+    "name": "pi001",
+    "maxCapacity": 1001,
+    "thing": true
+}
+```
