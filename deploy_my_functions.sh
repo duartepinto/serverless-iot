@@ -11,10 +11,10 @@ cp ./my_rig_config.json ./server/func_super_heavy/
 cp ./my_rig_config.json ./server/func_obese_heavy/
 
 #BUILD FUNCTIONS
-faas-cli build -f server/func_light.yml
-faas-cli build -f server/func_heavy.yml
-faas-cli build -f server/func_super_heavy.yml
-faas-cli build -f server/func_obese_heavy.yml
+sudo faas-cli build -f server/func_light.yml
+sudo faas-cli build -f server/func_heavy.yml
+sudo faas-cli build -f server/func_super_heavy.yml
+sudo faas-cli build -f server/func_obese_heavy.yml
 
 #if [ "$server" = false ];
 if [ "$1" != "--server" ];
