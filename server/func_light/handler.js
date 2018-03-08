@@ -1,3 +1,4 @@
+
 /*jshint esversion: 6 */
 /*global require, module,  __dirname */
 /*jshint node: true */
@@ -5,37 +6,50 @@
 'use strict';
 
 const express = require('express')
+const request = require('request')
 const app = express()
 
-function handle(req, res) {
-    var data = {}
+const rigConfig = require('my_rig_config.json')
+
+var data = {}
+var value 
+
+function handle(req) {
     if(req == undefined || req == null){
         data.status= "error"
         console.info(JSON.stringify(data))
     }
 
-    var request
-    var value 
-
     try{
-        request = JSON.parse(req)
-        value = request.value;
+        req = JSON.parse(req)
+        value = req.value;
     }catch (err) {
-        data.status= "error"
+        data.status= err
         console.info(JSON.stringify(data))
         return 
     }
 
-    if(value == true){
-        data.status = "The light is ON"
-    }else{
-        data.status = "The light is OFF"
-    }
 
-    console.log(JSON.stringify(data))
+    request(rigConfig.localUrl+":"+rigConfig.localPort+"/function/nodeinfo", uponNodeInfoReq)
+
     return
 }
 
-module.exports = (req, res) => {
-    handle(req, res)
+function uponNodeInfoReq(err, response, body){
+    data.nodeInfo = body
+    data.message = "I was able to achieve this result using LIGHT calculations"
+    data.status = assertValue(value)
+    console.log(JSON.stringify(data))
+}
+
+function assertValue(value){
+    if(value == true){
+        return "The light is ON"
+    }else{
+        return "The light is OFF"
+    }
+}
+
+module.exports = (req,res) => {
+    handle(req,res)
 }
