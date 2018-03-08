@@ -75,10 +75,10 @@ function makeCloudRequest(functionAddress, reqData){
     url += "/" + functionAddress
     
     //TODO REMOVE THIS
-    var data = {}
-    data.status = "This ran on the server. Hurray?"
-    console.info(JSON.stringify(data))
-    return
+    //var data = {}
+    //data.status = "This ran on the server. Hurray?"
+    //console.info(JSON.stringify(data))
+    //return
 
     request.post({url,json: reqData}, responseCloud)
      
