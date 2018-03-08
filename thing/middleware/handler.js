@@ -8,7 +8,6 @@ const express = require('express')
 const request = require('request')
 const app = express()
 
-
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
 
@@ -48,6 +47,15 @@ function handle(req) {
     }
     var url
     var isLocal = functionDeployed(func)
+
+    //If it is a server, then automatically make cloud request. 
+    //This 'if' should be unnecessary because this function should not be deployed to the server swarm.
+    //Should only be deployed in the local swarm
+    if(!rigConfigs.thing){
+        makeCloudRequest(func.address, reqData)
+        return
+    }
+
     if(functionDeployed(func)){
         makeLocalRequest(func.address, reqData)
     }else{
