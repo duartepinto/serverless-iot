@@ -50,10 +50,11 @@ function handle(req) {
     //If it is a server, then automatically make cloud request. 
     //This 'if' should be unnecessary because this function should not be deployed to the server swarm.
     //Should only be deployed in the local swarm
-    if(!rigConfigs.thing){
-        makeCloudRequest(func.address, reqData)
-        return
-    }
+    //if(!rigConfigs.thing){
+        //makeLocalRequest(func.address, reqData)
+        //return
+    //}
+
 
     if(functionDeployed(func)){
         makeLocalRequest(func.address, reqData)
@@ -72,24 +73,21 @@ function makeLocalRequest(functionAddress, reqData){
 function makeCloudRequest(functionAddress, reqData){
     var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
     url += "/" + functionAddress
-    
-     request.post({url,json: reqData}, responseCloud)
-     
+
+    request.post({url,json: reqData}, responseCloud)
 }
 
 function responseLocal(err,httpResponse, body){
-    //console.log("err", err)
-    //console.log("httpResponse", httpResponse)
-    //console.log("body", body)
     console.info(JSON.stringify(body))
 }
 
 function responseCloud(err,httpResponse, body){
-    if(err != undefined){
+    if(err == undefined){
         console.info(JSON.stringify(body))
         return
     }else{
-        makeLocalRequest(func.address, reqData)
+        console.info(JSON.stringify(body))
+        //makeLocalRequest(func.address, reqData)
     }
 }
 
