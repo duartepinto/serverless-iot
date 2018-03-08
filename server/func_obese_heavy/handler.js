@@ -8,7 +8,7 @@ const express = require('express')
 const request = require('request')
 const app = express()
 
-const rigConfig = require('my_rig_config.json')
+const rigConfig = require('./my_rig_config.json')
 
 var data = {}
 var value 
@@ -29,7 +29,7 @@ function handle(req) {
     }
 
 
-    request(rigConfig.localUrl+":"+rigConfig.localPort+"/function/nodeinfo", uponNodeInfoReq)
+    request.post({url: rigConfig.localUrl+":"+rigConfig.localPort+"/function/func_nodeinfo", json:{}}, uponNodeInfoReq)
 
     return
 }
