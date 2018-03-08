@@ -24,7 +24,6 @@ function handle(req) {
         return
     }
 
-
     try{
         req = JSON.parse(req)
         reqFunc  = req.func;
@@ -74,23 +73,20 @@ function makeCloudRequest(functionAddress, reqData){
     var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
     url += "/" + functionAddress
     
-    //TODO REMOVE THIS
-    //var data = {}
-    //data.status = "This ran on the server. Hurray?"
-    //console.info(JSON.stringify(data))
-    //return
-
-    request.post({url,json: reqData}, responseCloud)
+     request.post({url,json: reqData}, responseCloud)
      
 }
 
 function responseLocal(err,httpResponse, body){
-    console.info(body)
+    //console.log("err", err)
+    //console.log("httpResponse", httpResponse)
+    //console.log("body", body)
+    console.info(JSON.stringify(body))
 }
 
 function responseCloud(err,httpResponse, body){
     if(err != undefined){
-        console.info(body)
+        console.info(JSON.stringify(body))
         return
     }else{
         makeLocalRequest(func.address, reqData)
