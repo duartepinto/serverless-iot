@@ -4,9 +4,7 @@
 /*jshint asi: true */
 'use strict';
 
-const express = require('express')
 const request = require('request')
-const app = express()
 
 const rigConfig = require('./my_rig_config.json')
 
@@ -38,7 +36,7 @@ function uponNodeInfoReq(err, response, body){
     data.nodeInfo = body
     data.message = "I was able to achieve this result using OBESE HEAVY calculations"
     data.status = assertValue(value)
-    console.log(JSON.stringify(data))
+    console.info(JSON.stringify(data))
 }
 
 function assertValue(value){

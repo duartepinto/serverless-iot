@@ -86,8 +86,7 @@ function responseCloud(err,httpResponse, body){
         console.info(JSON.stringify(body))
         return
     }else{
-        console.info(JSON.stringify(body))
-        //makeLocalRequest(func.address, reqData)
+        makeLocalRequest(func.address, reqData)
     }
 }
 

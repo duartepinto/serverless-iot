@@ -4,9 +4,7 @@
 /*jshint asi: true */
 'use strict';
 
-const express = require('express')
 const request = require('request')
-const app = express()
 
 const rigConfig = require('./my_rig_config.json')
 
@@ -29,7 +27,7 @@ function handle(req) {
     }
 
 
-    request(rigConfig.localUrl+":"+rigConfig.localPort+"/function/func_nodeinfo", uponNodeInfoReq)
+    request.post({url: rigConfig.localUrl+":"+rigConfig.localPort+"/function/func_nodeinfo", json:{}}, uponNodeInfoReq)
 
     return
 }
