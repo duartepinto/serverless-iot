@@ -4,9 +4,7 @@
 /*jshint asi: true */
 'use strict';
 
-const express = require('express')
 const request = require('request')
-const app = express()
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
