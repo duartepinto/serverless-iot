@@ -1,9 +1,0 @@
-{
-    "name": "pi001",
-    "maxCapacity": 1001,
-    "thing": true,
-    "localUrl": "http://192.168.78.1",
-    "localPort": 8080,
-    "serverUrl": "http://192.168.78.128",
-    "serverPort": "8080"
-}
