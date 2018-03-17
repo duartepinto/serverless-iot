@@ -37,7 +37,8 @@ function uponNodeInfoReq(err, response, body){
     data.nodeInfo = body
     data.message = "I was able to achieve this result using LIGHT calculations"
     data.status = assertValue(value)
-    console.log(JSON.stringify(data))
+    console.info(JSON.stringify(data))
+    return 
 }
 
 function assertValue(value){

@@ -9,5 +9,5 @@ functions:
     image: server/func_light
     build:
         extra-files:
-            from: ./thing/middleware/my_rig_config.json
+            from: ./my_rig_config.json
             to: /home/app/function/my_rig_config.json
