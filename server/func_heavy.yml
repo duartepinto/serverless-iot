@@ -7,6 +7,8 @@ functions:
     lang: node
     handler: ./server/func_heavy
     image: server/func_heavy
+    extras:
+        weight: 100
     build:
         extra-files:
             from: ./my_rig_config.json
