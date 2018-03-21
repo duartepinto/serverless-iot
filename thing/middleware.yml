@@ -9,7 +9,7 @@ functions:
     image: thing/middleware
     build:
         extra-files:
-            from: ./my_functions.json
+            from: .config/my_functions.json
             to: /home/app/function/my_functions.json 
             from: ./my_rig_config.json
             to: /home/app/function/my_rig_config.json 

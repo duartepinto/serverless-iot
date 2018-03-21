@@ -43,14 +43,16 @@ fi
 ############
 echo "Testing functions"
 
-echo curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_light", "data":{"value":true}}'
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_light", "data":{"value": true}}'
+# echo on
+#set -x 
+set -v
 
-echo curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_heavy", "data":{"value": false}}'
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_heavy", "data":{"value": false}}'
+curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_light", "data":{"value": true}}'
 
-echo curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_super_heavy", "data":{"value": true}}'
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_super_heavy", "data":{"value": true}}'
+curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_heavy", "data":{"value": false}}'
 
-echo curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_obese_heavy", "data":{"value": false}}'
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"server/func_obese_heavy", "data":{"value": false}}'
+curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_super_heavy", "data":{"value": true}}'
+
+curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_obese_heavy", "data":{"value": false}}'
+
+set +v

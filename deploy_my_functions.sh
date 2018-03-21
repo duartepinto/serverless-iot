@@ -2,6 +2,7 @@
 
 DEV=false
 SERVER=false
+CACHE=true
 
 while [[ $# -gt 0 ]]
 do
@@ -15,6 +16,11 @@ case $key in
     -s|--server)
     SERVER=true
     shift # past argument
+    ;;
+    --no-cache)
+    CACHE=false
+    shift # past argument
+    shift # past value
     ;;
     *)    # unknown option
     print >&2 "Usage: $0 [-d|--development-mode] [-s|--server] "
@@ -43,19 +49,31 @@ then
     rm ./thing/middleware/my_functions.json
     rm ./thing/middleware/my_rig_config.json
     ln -s ../../my_rig_config.json ./thing/middleware/my_rig_config.json
-    ln -s ../../my_functions.json ./thing/middleware/my_functions.json
+    ln -s ../../.config/my_functions.json ./thing/middleware/my_functions.json
 fi
 
 #BUILD FUNCTIONS
-sudo faas-cli build -f server/func_light.yml
-sudo faas-cli build -f server/func_heavy.yml
-sudo faas-cli build -f server/func_super_heavy.yml
-sudo faas-cli build -f server/func_obese_heavy.yml
+if [ "$CACHE" = true ];
+then
+    sudo faas-cli build -f server/func_light.yml
+    sudo faas-cli build -f server/func_heavy.yml
+    sudo faas-cli build -f server/func_super_heavy.yml
+    sudo faas-cli build -f server/func_obese_heavy.yml
+else
+    sudo faas-cli build -f server/func_light.yml --no-cache
+    sudo faas-cli build -f server/func_heavy.yml --no-cache
+    sudo faas-cli build -f server/func_super_heavy.yml --no-cache
+    sudo faas-cli build -f server/func_obese_heavy.yml --no-cache
+fi
 
-#if [ "$server" = false ];
 if [ "$SERVER" = false ];
 then
-    sudo faas-cli build -f thing/middleware.yml
+    if [ "$CACHE" = true ];
+    then
+        sudo faas-cli build -f thing/middleware.yml 
+    else
+        sudo faas-cli build -f thing/middleware.yml --no-cache
+    fi
 fi
 
 #DEPLOY FUNCTIONS

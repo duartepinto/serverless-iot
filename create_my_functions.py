@@ -40,10 +40,10 @@ def parse_yml_file(path: str,filename: str) -> {}:
             function = yaml.load(stream)
             data = {}
             for key in function['functions']:
-                data['name'] = function['functions'][key]['image']
+                data['name'] = key
                 data['address'] = "function/" + key
                 data['weight'] = function['functions'][key]['extras']['weight']
-            print(data)
+            # print(data)
             functionsdata.append(data)
         except yaml.YAMLError as exc:
             print(exc)
@@ -51,8 +51,11 @@ def parse_yml_file(path: str,filename: str) -> {}:
     return functionsdata
 
 def create_my_functions_file(myfunctions: []):
-    with open('my_functions.json', 'w') as outfile:
-        json.dump(myfunctions, outfile)
+    directory = '.config'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(directory +'/' + 'my_functions.json', 'w') as outfile:
+        json.dump(myfunctions, outfile, indent=4)
 
 # Sadly, Python fails to provide the following magic number for us.
 ERROR_INVALID_NAME = 123
