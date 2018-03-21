@@ -20,6 +20,7 @@ function handle(req) {
 
     var reqFunc
     var reqData
+    var func
 
     try{
         req = JSON.parse(req)
