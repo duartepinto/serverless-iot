@@ -9,9 +9,6 @@ const request = require('request')
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
 
-var reqFunc
-var reqData
-var func  
 
 function handle(req) {
     var data = {}
@@ -21,6 +18,10 @@ function handle(req) {
         console.info(JSON.stringify(data))
         return
     }
+
+    var reqFunc
+    var reqData
+    var func  
 
     try{
         req = JSON.parse(req)
@@ -54,7 +55,7 @@ function handle(req) {
     //}
 
 
-    if(functionDeployed(func)){
+    if(isLocal){
         makeLocalRequest(func.address, reqData)
     }else{
         makeCloudRequest(func.address, reqData)
@@ -72,19 +73,21 @@ function makeCloudRequest(functionAddress, reqData){
     var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
     url += "/" + functionAddress
 
-    request.post({url,json: reqData}, responseCloud)
+    request.post({url,json: reqData}, ( function(err,resp,body){
+        responseCloud(err,resp, body, functionAddress, reqData)
+    }))
 }
 
-function responseLocal(err,httpResponse, body){
+function responseLocal(err,resp, body){
     console.info(JSON.stringify(body))
 }
 
-function responseCloud(err,httpResponse, body){
-    if(err == undefined){
+function responseCloud(err, resp, body, functionAddress , reqData){
+    if(err === undefined){
         console.info(JSON.stringify(body))
         return
     }else{
-        makeLocalRequest(func.address, reqData)
+        makeLocalRequest(functionAddress, reqData)
     }
 }
 
