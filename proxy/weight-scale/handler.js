@@ -8,6 +8,14 @@ const request = require('request')
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
+const queryList = {
+    duration_seconds : {
+        query : "gateway_functions_seconds_sum"
+    },
+    invocation_count : {
+        query : "gateway_functions_invocation_total"
+    }
+}
 
 function handle(req) {
     var data = {}
@@ -19,13 +27,13 @@ function handle(req) {
     }
 
     var reqFunc
-    var reqData
+    var reqQuery
     var func
 
     try{
         req = JSON.parse(req)
         reqFunc  = req.func;
-        reqData = req.data
+        reqQuery = req.query
 
         for(var i = 0; i < funcsConfig.length; i++) {
             if(reqFunc == funcsConfig[i].name){
@@ -36,6 +44,9 @@ function handle(req) {
             if(i == funcsConfig.length - 1)
                 throw new Error("function not found")
         }
+
+        if(queryList[reqQuery] === undefined)
+                throw new Error("query not found")
     }catch (err) {
         data.status= "error"
         data.message = "" + err
