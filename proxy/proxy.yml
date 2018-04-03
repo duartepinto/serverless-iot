@@ -3,10 +3,10 @@ provider:
   gateway: http://localhost:8080
 
 functions:
-  middleware:
+  proxy:
     lang: node
-    handler: ./thing/middleware
-    image: thing/middleware
+    handler: ./proxy/proxy
+    image: proxy/proxy
     build:
         extra-files:
             from: .config/my_functions.json
