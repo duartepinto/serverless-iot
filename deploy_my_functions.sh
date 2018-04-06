@@ -45,11 +45,15 @@ then
     ln -s ../../my_rig_config.json ./example_functions/func_super_heavy/my_rig_config.json
     ln -s ../../my_rig_config.json ./example_functions/func_obese_heavy/my_rig_config.json
 
-    echo Creating symlinks for middleware
+    echo Creating symlinks for proxy functions 
     rm ./proxy/proxy/my_functions.json
     rm ./proxy/proxy/my_rig_config.json
+    rm ./proxy/weight-scale/my_functions.json
+    rm ./proxy/weight-scale/my_rig_config.json
     ln -s ../../my_rig_config.json ./proxy/proxy/my_rig_config.json
     ln -s ../../.config/my_functions.json ./proxy/proxy/my_functions.json
+    ln -s ../../my_rig_config.json ./proxy/weight-scale/my_rig_config.json
+    ln -s ../../.config/my_functions.json ./proxy/weight-scale/my_functions.json
 fi
 
 #BUILD FUNCTIONS
