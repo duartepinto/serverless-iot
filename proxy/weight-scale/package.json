@@ -11,8 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "request": "^2.83.0"
+    "express": "^4.16.2"
   },
   "devDependencies": {
+    "run-func": "^1.0.2"
   }
 }

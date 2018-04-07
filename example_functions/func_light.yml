@@ -3,12 +3,12 @@ provider:
   gateway: http://localhost:8080
 
 functions:
-  func_obese_heavy:
+  func_light:
     lang: node
-    handler: ./server/func_obese_heavy
-    image: server/func_obese_heavy
-    extras:
-        weight: 9007199254740991
+    handler: ./example_functions/func_light
+    image: example_functions/func_light
+    extras: 
+        weight: 10
     build:
         extra-files:
             from: ./my_rig_config.json

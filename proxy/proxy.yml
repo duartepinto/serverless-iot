@@ -1,0 +1,15 @@
+provider:
+  name: faas
+  gateway: http://localhost:8080
+
+functions:
+  proxy:
+    lang: node
+    handler: ./proxy/proxy
+    image: proxy/proxy
+    build:
+        extra-files:
+            from: .config/my_functions.json
+            to: /home/app/function/my_functions.json 
+            from: ./my_rig_config.json
+            to: /home/app/function/my_rig_config.json 

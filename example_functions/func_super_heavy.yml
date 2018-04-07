@@ -3,12 +3,12 @@ provider:
   gateway: http://localhost:8080
 
 functions:
-  func_heavy:
+  func_super_heavy:
     lang: node
-    handler: ./server/func_heavy
-    image: server/func_heavy
+    handler: ./example_functions/func_super_heavy
+    image: example_functions/func_super_heavy
     extras:
-        weight: 100
+        weight: 1000
     build:
         extra-files:
             from: ./my_rig_config.json
