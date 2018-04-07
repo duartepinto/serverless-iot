@@ -5,6 +5,7 @@
 'use strict';
 
 const request = require('request')
+const syncRequest = require('sync-request')
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
@@ -93,25 +94,25 @@ function responseCloud(err, resp, body, functionAddress , reqData){
 
 // This function needs to be atomic (or at least guarantee consistency)
 function functionDeployed(func){
-    var currentLoad = getCurrentLoad()
-    if(currentLoad + func.weight < rigConfigs.maxCapacity && increaseCurrentLoad(func.weight)){
+    if(func.cloudOnly === true)
         return true
-    }else{
-        return false
-    }
+
+    var functionWeights = getFunctionWeights(func);
+
+    functionWeights.then(function(result){
+        if(functionWeights.cloudWeight > functionWeights.localWeight){
+            return true
+        }else{
+            return false
+        }
+    })
+    
 }
 
 //TODO IMPLEMENT
-function getCurrentLoad(){
-    return 0
+function getFunctionWeights(){
+
 }
-
-//TODO IMPLEMENT
-function increaseCurrentLoad(weight){
-    return true
-}
-
-
 
 module.exports = (req,res) => {
     handle(req,res)
