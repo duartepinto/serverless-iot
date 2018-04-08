@@ -1,0 +1,19 @@
+provider:
+  name: faas
+  gateway: http://127.0.0.1:8080
+
+functions:
+  insert_duration:
+    lang: node8-express
+    handler: ./proxy/insert_duration
+    image: proxy/insert_duration
+    build:
+      extra-files:
+        from: .config/my_functions.json
+        to: /home/app/function/my_functions.json 
+        from: ./my_rig_config.json
+        to: /home/app/function/my_rig_config.json 
+    environment:
+      write_timeout: 10s
+      read_timeout: 10s
+      mongo: openfaas-db-mongodb
