@@ -1,3 +1,7 @@
+/*jshint esversion: 6 */
+/*global require, module,  __dirname */
+/*jshint node: true */
+/*jshint asi: true */
 "use strict"
 
 module.exports = (event, context) => {

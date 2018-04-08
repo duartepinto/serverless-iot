@@ -3,10 +3,10 @@ provider:
   gateway: http://127.0.0.1:8080
 
 functions:
-  insert_duration:
+  get_duration:
     lang: node8-express
-    handler: ./proxy/insert_duration
-    image: proxy/insert_duration
+    handler: ./proxy/get_duration
+    image: proxy/get_duration
     build:
       extra-files:
         from: .config/my_functions.json

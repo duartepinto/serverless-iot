@@ -2,7 +2,7 @@
 /*global require, module,  __dirname */
 /*jshint node: true */
 /*jshint asi: true */
-'use strict';
+"use strict"
 
 const MongoClient = require('mongodb').MongoClient 
 const assert = require('assert')
@@ -12,7 +12,7 @@ const rigConfigs = require('./my_rig_config.json')
 
 var statsDB;  // Cached connection-pool for further requests.
 
-function handle(event, context) {
+function handle(event, context){
     var data = {}
     if(event.body === undefined || event === null){
         data.status= "error1"
@@ -20,14 +20,12 @@ function handle(event, context) {
         return context.fail(JSON.stringify(data))
     }
 
-    var duration
     var functionName
 
     var func
     var body = event.body
     try{
         functionName = body.func;
-        duration = body.duration
 
         for(var i = 0; i < funcsConfig.length; i++) {
             if(functionName == funcsConfig[i].name){
@@ -42,19 +40,20 @@ function handle(event, context) {
         data.status= "error"
         data.message = "" + err
         return context.fail(JSON.stringify(data))
-    }   
+    }
 
     prepareDB()
     .then((stats) => {
-        const record = {"function": func.name, "duration": duration};
+        const query = {"function": func.name};
 
-        stats.collection("stats").insertOne(record, (insertErr) => {
-            if(insertErr) {
-                return context.fail(insertErr.toString());
+        stats.collection("stats").find(query).toArray((err, items) => {
+            if(err) {
+                return context.fail(err.toString());
             }
 
             const result =  {
-                status: "Insert done of: " + JSON.stringify(event.hody)
+                status: "success",
+                items
             };
     
             context 
@@ -90,6 +89,6 @@ const prepareDB = () => {
     });
 }
 
-module.exports = (event,context) => {
-    handle(event,context)
+module.exports = (event, context) => {
+    handle(event, context)
 }

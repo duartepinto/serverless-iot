@@ -47,15 +47,6 @@ function handle(req) {
     var url
     var isLocal = functionDeployed(func)
 
-    //If it is a server, then automatically make cloud request. 
-    //This 'if' should be unnecessary because this function should not be deployed to the server swarm.
-    //Should only be deployed in the local swarm
-    //if(!rigConfigs.thing){
-        //makeLocalRequest(func.address, reqData)
-        //return
-    //}
-
-
     if(isLocal){
         makeLocalRequest(func.address, reqData)
     }else{
