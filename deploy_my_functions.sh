@@ -48,16 +48,16 @@ then
     echo Creating symlinks for proxy functions 
     rm ./proxy/proxy/my_functions.json
     rm ./proxy/proxy/my_rig_config.json
-    rm ./proxy/weight-scale/my_functions.json
-    rm ./proxy/weight-scale/my_rig_config.json
+    rm ./proxy/weight_scale/my_functions.json
+    rm ./proxy/weight_scale/my_rig_config.json
     rm ./proxy/insert_duration/my_functions.json
     rm ./proxy/insert_duration/my_rig_config.json
     rm ./proxy/get_duration/my_functions.json
     rm ./proxy/get_duration/my_rig_config.json
     ln -s ../../my_rig_config.json ./proxy/proxy/my_rig_config.json
     ln -s ../../.config/my_functions.json ./proxy/proxy/my_functions.json
-    ln -s ../../my_rig_config.json ./proxy/weight-scale/my_rig_config.json
-    ln -s ../../.config/my_functions.json ./proxy/weight-scale/my_functions.json
+    ln -s ../../my_rig_config.json ./proxy/weight_scale/my_rig_config.json
+    ln -s ../../.config/my_functions.json ./proxy/weight_scale/my_functions.json
     ln -s ../../my_rig_config.json ./proxy/insert_duration/my_rig_config.json
     ln -s ../../.config/my_functions.json ./proxy/insert_duration/my_functions.json
     ln -s ../../my_rig_config.json ./proxy/get_duration/my_rig_config.json
@@ -83,12 +83,12 @@ then
     if [ "$CACHE" = true ];
     then
         sudo faas-cli build -f proxy/proxy.yml 
-        sudo faas-cli build -f proxy/weight-scale.yml 
+        sudo faas-cli build -f proxy/weight_scale.yml 
         sudo faas-cli build -f proxy/insert_duration.yml 
         sudo faas-cli build -f proxy/get_duration.yml 
     else
         sudo faas-cli build -f proxy/proxy.yml --no-cache
-        sudo faas-cli build -f proxy/weight-scale.yml --no-cache
+        sudo faas-cli build -f proxy/weight_scale.yml --no-cache
         sudo faas-cli build -f proxy/insert_duration.yml --no-cache
         sudo faas-cli build -f proxy/get_duration.yml --no-cache
     fi
@@ -103,7 +103,7 @@ faas-cli deploy -f example_functions/func_obese_heavy.yml
 if [ "$SERVER" = false ];
 then
     faas-cli deploy -f proxy/proxy.yml
-    faas-cli deploy -f proxy/weight-scale.yml
+    faas-cli deploy -f proxy/weight_scale.yml
     faas-cli deploy -f proxy/insert_duration.yml
     faas-cli deploy -f proxy/get_duration.yml
 fi
