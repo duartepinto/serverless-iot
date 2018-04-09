@@ -22,16 +22,19 @@ function handle(req) {
 
     var reqFunc
     var reqData
+    var reqOptions
     var func  
 
     try{
         req = JSON.parse(req)
         reqFunc  = req.func;
         reqData = req.data
+        reqOptions = req.options
 
         for(var i = 0; i < funcsConfig.length; i++) {
             if(reqFunc == funcsConfig[i].name){
                 func = funcsConfig[i]
+                func.requestOptions = reqOptions
                 break
             }
 
@@ -47,11 +50,19 @@ function handle(req) {
     var url
     var isLocal = functionDeployed(func)
 
-    if(isLocal){
-        makeLocalRequest(func.address, reqData)
-    }else{
-        makeCloudRequest(func, reqData)
-    }
+    isLocal.then((result) =>{
+        if(result){
+            makeLocalRequest(func.address, reqData)
+        }else{
+            makeCloudRequest(func, reqData)
+        }
+    }, (err) => {
+        var body = {}
+        body.status = "error"
+        body.message = err
+        console.info(JSON.stringify(body))
+    }) 
+    
 }
 
 function makeLocalRequest(functionAddress, reqData){
@@ -87,26 +98,26 @@ function responseCloud(err, resp, body, func , reqData, initTime){
     }
 }
 
-// This function needs to be atomic (or at least guarantee consistency)
 function functionDeployed(func){
-    if(func.cloudOnly === true)
-        return true
+    return new Promise((resolve, reject) => {
+        if(func.cloudOnly === true || 
+            (func.requestOptions !== undefined && func.requestOptions.forceCloud === true ))
+            return resolve(false)
 
-    var functionWeights = getFunctionWeights(func);
+        request.post({function: func.name}, (error, response, body) => {
+            body = JSON.parse(body)
+            if(error || body.status != "success") {
+                return reject(error)
+            }
 
-    functionWeights.then(function(result){
-        if(functionWeights.cloudWeight > functionWeights.localWeight){
-            return true
-        }else{
-            return false
-        }
+            if(body.cloudWeight > body.localWeight){
+                return resolve(true)
+            }else{
+                return resolve(false)
+            }
+        })
+
     })
-    
-}
-
-//TODO IMPLEMENT
-function getFunctionWeights(){
-
 }
 
 module.exports = (req,res) => {
