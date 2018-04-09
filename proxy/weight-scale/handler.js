@@ -63,8 +63,8 @@ function handle(req) {
     var localPromise = getLocalWeight(reqFunc, query.query)
     var cloudPromise = getCloudWeight(reqFunc, query.query)
     
-    //Promise.all([localPromise, cloudPromise]).then(returnWeights)
-    Promise.all([localPromise]).then(returnWeights)
+    Promise.all([localPromise, cloudPromise]).then(returnWeights)
+    //Promise.all([localPromise]).then(returnWeights)
 
 }
 
@@ -72,7 +72,7 @@ function returnWeights(results) {
     var body = {}
     body.status = "success"
     body.localWeight = results[0]
-    //body.cloudWeight = results[1]
+    body.cloudWeight = results[1]
     console.info(JSON.stringify(body))
 }
 
@@ -82,27 +82,56 @@ function getLocalWeight(functionName, query){
     var parameters = "?query=" + query + '{function_name="'+functionName + '"}'
 
     var url = host + path + parameters
-    console.log("url", url)
 
     return new Promise(function(resolve, reject){
         request.get(url, function(err, resp, body) {
             if (err) {
-                reject(err);
+                return reject(err);
             } else {
                 body = JSON.parse(body)
                 if(body.status === "success" && body.data.result[0] != undefined){
-                    resolve(body.data.result[0].value[1])
-                    return
+                    return resolve(body.data.result[0].value[1])
                 }
                 
-                resolve(undefined)
+                resolve(null)
             }
         })
     })
 }
 
 function getCloudWeight(functionName, query){
-    //TODO
+    var host = rigConfigs.localUrl + ":" +  rigConfigs.localPort
+    var path = "/function/get_duration"
+
+    var url = host + path 
+    var body = {func: functionName}
+
+    return new Promise(function(resolve, reject){
+        if(query !== queryList.average_duration_seconds.query)
+            return resolve(null)
+        request.post({url, json: body}, function(err, resp, body) {
+            if (err) {
+                reject(err);
+                resolve(null)
+            } else {
+                if(body.status === "success" && body.items.length > 0){
+                    var avgDuration = getAvgDuration(body.items)
+                    return resolve(avgDuration)
+                }
+                
+                return resolve(null)
+            }
+        })
+    })
+}
+
+function getAvgDuration(items){
+    var sum = 0;
+    var length = items.length
+    for (var i = 0; i < length; i++){
+        sum += items[i].duration;
+    }
+    return sum/length
 }
 
 module.exports = (req,res) => {

@@ -39,6 +39,7 @@ function handle(event, context){
     }catch (err) {
         data.status= "error"
         data.message = "" + err
+        data.event = event
         return context.fail(JSON.stringify(data))
     }
 

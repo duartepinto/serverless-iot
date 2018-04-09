@@ -48,9 +48,9 @@ function handle(req) {
         return 
     }
     var url
-    var isLocal = functionDeployed(func)
+    var isLocalPromise = functionDeployed(func)
 
-    isLocal.then((result) =>{
+    isLocalPromise.then((result) =>{
         if(result){
             makeLocalRequest(func.address, reqData)
         }else{
