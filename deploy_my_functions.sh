@@ -1,7 +1,7 @@
 #! /bin/bash
 
 DEV=false
-example_functions=false
+SERVER=false
 CACHE=true
 
 while [[ $# -gt 0 ]]
@@ -14,7 +14,7 @@ case $key in
     shift # past argument
     ;;
     -s|--example_functions)
-    example_functions=true
+    SERVER=true
     shift # past argument
     ;;
     --no-cache)
@@ -50,10 +50,18 @@ then
     rm ./proxy/proxy/my_rig_config.json
     rm ./proxy/weight-scale/my_functions.json
     rm ./proxy/weight-scale/my_rig_config.json
+    rm ./proxy/insert_duration/my_functions.json
+    rm ./proxy/insert_duration/my_rig_config.json
+    rm ./proxy/get_duration/my_functions.json
+    rm ./proxy/get_duration/my_rig_config.json
     ln -s ../../my_rig_config.json ./proxy/proxy/my_rig_config.json
     ln -s ../../.config/my_functions.json ./proxy/proxy/my_functions.json
     ln -s ../../my_rig_config.json ./proxy/weight-scale/my_rig_config.json
     ln -s ../../.config/my_functions.json ./proxy/weight-scale/my_functions.json
+    ln -s ../../my_rig_config.json ./proxy/insert_duration/my_rig_config.json
+    ln -s ../../.config/my_functions.json ./proxy/insert_duration/my_functions.json
+    ln -s ../../my_rig_config.json ./proxy/get_duration/my_rig_config.json
+    ln -s ../../.config/my_functions.json ./proxy/get_duration/my_functions.json
 fi
 
 #BUILD FUNCTIONS
@@ -70,13 +78,19 @@ else
     sudo faas-cli build -f example_functions/func_obese_heavy.yml --no-cache
 fi
 
-if [ "$example_functions" = false ];
+if [ "$SERVER" = false ];
 then
     if [ "$CACHE" = true ];
     then
         sudo faas-cli build -f proxy/proxy.yml 
+        sudo faas-cli build -f proxy/weight-scale.yml 
+        sudo faas-cli build -f proxy/insert_duration.yml 
+        sudo faas-cli build -f proxy/get_duration.yml 
     else
         sudo faas-cli build -f proxy/proxy.yml --no-cache
+        sudo faas-cli build -f proxy/weight-scale.yml --no-cache
+        sudo faas-cli build -f proxy/insert_duration.yml --no-cache
+        sudo faas-cli build -f proxy/get_duration.yml --no-cache
     fi
 fi
 
@@ -86,7 +100,10 @@ faas-cli deploy -f example_functions/func_heavy.yml
 faas-cli deploy -f example_functions/func_super_heavy.yml
 faas-cli deploy -f example_functions/func_obese_heavy.yml
 
-if [ "$example_functions" = false ];
+if [ "$SERVER" = false ];
 then
     faas-cli deploy -f proxy/proxy.yml
+    faas-cli deploy -f proxy/weight-scale.yml
+    faas-cli deploy -f proxy/insert_duration.yml
+    faas-cli deploy -f proxy/get_duration.yml
 fi

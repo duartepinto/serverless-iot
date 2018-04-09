@@ -5,6 +5,7 @@
 'use strict';
 
 const request = require('request')
+const syncRequest = require('sync-request')
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
@@ -46,21 +47,11 @@ function handle(req) {
     var url
     var isLocal = functionDeployed(func)
 
-    //If it is a server, then automatically make cloud request. 
-    //This 'if' should be unnecessary because this function should not be deployed to the server swarm.
-    //Should only be deployed in the local swarm
-    //if(!rigConfigs.thing){
-        //makeLocalRequest(func.address, reqData)
-        //return
-    //}
-
-
     if(isLocal){
         makeLocalRequest(func.address, reqData)
     }else{
-        makeCloudRequest(func.address, reqData)
+        makeCloudRequest(func, reqData)
     }
-
 }
 
 function makeLocalRequest(functionAddress, reqData){
@@ -69,12 +60,13 @@ function makeLocalRequest(functionAddress, reqData){
     request.post({url,json: reqData}, responseLocal)
 }
 
-function makeCloudRequest(functionAddress, reqData){
+function makeCloudRequest(func, reqData){
     var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
-    url += "/" + functionAddress
+    var initTime = process.hrtime()[0]
+    url += "/" + func.address 
 
     request.post({url,json: reqData}, ( function(err,resp,body){
-        responseCloud(err,resp, body, functionAddress, reqData)
+        responseCloud(err,resp, body, func, reqData, initTime)
     }))
 }
 
@@ -82,36 +74,40 @@ function responseLocal(err,resp, body){
     console.info(JSON.stringify(body))
 }
 
-function responseCloud(err, resp, body, functionAddress , reqData){
+function responseCloud(err, resp, body, func , reqData, initTime){
     if(err === undefined){
+        var duration = process.hrtime()[0] - initTime
         console.info(JSON.stringify(body))
+        var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
+        var durationReqbody = {func: func.name, duration: duration}
+        request.post({url, json: durationReqbody})
         return
     }else{
-        makeLocalRequest(functionAddress, reqData)
+        makeLocalRequest(func.address, reqData)
     }
 }
 
 // This function needs to be atomic (or at least guarantee consistency)
 function functionDeployed(func){
-    var currentLoad = getCurrentLoad()
-    if(currentLoad + func.weight < rigConfigs.maxCapacity && increaseCurrentLoad(func.weight)){
+    if(func.cloudOnly === true)
         return true
-    }else{
-        return false
-    }
+
+    var functionWeights = getFunctionWeights(func);
+
+    functionWeights.then(function(result){
+        if(functionWeights.cloudWeight > functionWeights.localWeight){
+            return true
+        }else{
+            return false
+        }
+    })
+    
 }
 
 //TODO IMPLEMENT
-function getCurrentLoad(){
-    return 0
+function getFunctionWeights(){
+
 }
-
-//TODO IMPLEMENT
-function increaseCurrentLoad(weight){
-    return true
-}
-
-
 
 module.exports = (req,res) => {
     handle(req,res)
