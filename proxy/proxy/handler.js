@@ -107,8 +107,8 @@ function getTimeElapsed(initTime){
     const NS_PER_SEC = 1e9
 
     var diff = process.hrtime(initTime) 
-    var duration = diff[0] * NS_PER_SEC + diff[1]
-    duration = duration / NS_PER_SEC
+    var timeElapsed = diff[0] * NS_PER_SEC + diff[1]
+    return timeElapsed/ NS_PER_SEC
 }
 
 function functionDeployed(func){
