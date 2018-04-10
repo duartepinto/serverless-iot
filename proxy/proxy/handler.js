@@ -5,7 +5,6 @@
 'use strict';
 
 const request = require('request')
-const syncRequest = require('sync-request')
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
@@ -42,7 +41,7 @@ function handle(req) {
                 throw new Error("function not found")
         }
     }catch (err) {
-        data.status= "error"
+        data.status= "error2"
         data.message = "" + err
         console.info(JSON.stringify(data))
         return 
@@ -58,7 +57,7 @@ function handle(req) {
         }
     }, (err) => {
         var body = {}
-        body.status = "error"
+        body.status = "error3"
         body.message = err
         console.info(JSON.stringify(body))
     }) 
@@ -99,17 +98,30 @@ function responseCloud(err, resp, body, func , reqData, initTime){
 }
 
 function functionDeployed(func){
+
+    var reqBody = { func: func.name, query:"average_duration_seconds" }
+    var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/weight_scale"
+
     return new Promise((resolve, reject) => {
         if(func.cloudOnly === true || 
             (func.requestOptions !== undefined && func.requestOptions.forceCloud === true ))
             return resolve(false)
-
-        request.post({function: func.name}, (error, response, body) => {
-            body = JSON.parse(body)
-            if(error || body.status != "success") {
+        request.post({url, json: reqBody}, (error, response, body) => {
+            if(error || body.status !== "success") {
                 return reject(error)
             }
 
+            // If one of the weights is null it will random the execution
+            if(body.cloudWeight === null || body.localWeight === null){
+                var rnd = Math.floor(Math.random() * Math.floor(2))
+
+                if(rnd === 0){
+                    return resolve(true)
+                }else{
+                    return resolve(false)
+                }
+            }
+            
             if(body.cloudWeight > body.localWeight){
                 return resolve(true)
             }else{
