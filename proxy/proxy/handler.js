@@ -72,7 +72,7 @@ function makeLocalRequest(functionAddress, reqData){
 
 function makeCloudRequest(func, reqData){
     var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
-    var initTime = process.hrtime()[0]
+    var initTime = process.hrtime()
     url += "/" + func.address 
 
     request.post({url,json: reqData}, ( function(err,resp,body){
@@ -85,16 +85,30 @@ function responseLocal(err,resp, body){
 }
 
 function responseCloud(err, resp, body, func , reqData, initTime){
-    if(err === undefined){
-        var duration = process.hrtime()[0] - initTime
-        console.info(JSON.stringify(body))
-        var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
-        var durationReqbody = {func: func.name, duration: duration}
-        request.post({url, json: durationReqbody})
-        return
-    }else{
+    if(err){
         makeLocalRequest(func.address, reqData)
+        return
     }
+    var timeElapsed = getTimeElapsed(initTime)
+    
+    console.info(JSON.stringify(body))
+
+    sendCloudFunctionTimeElapsed(func,timeElapsed)
+}
+
+function sendCloudFunctionTimeElapsed(func, timeElapsed){
+
+    var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
+    var durationReqbody = {func: func.name, duration: timeElapsed}
+    return request.post({url, json: durationReqbody})
+}
+
+function getTimeElapsed(initTime){
+    const NS_PER_SEC = 1e9
+
+    var diff = process.hrtime(initTime) 
+    var duration = diff[0] * NS_PER_SEC + diff[1]
+    duration = duration / NS_PER_SEC
 }
 
 function functionDeployed(func){
