@@ -11,40 +11,34 @@ def main():
 
     myfunctions = []
     for arg in argv[1:]:
-        if is_path_exists_or_creatable(arg):
-            ymlfiles = [f for f in listdir(arg) if isfile(join(arg, f)) and f.endswith(".yml")]
-            for file in ymlfiles[0:]:
-                functionsdata = parse_yml_file(arg, file)
-                myfunctions = myfunctions + functionsdata
+        if is_path_exists_or_creatable(arg) and arg.endswith(".yml"):
+            functionsdata = parse_yml_file(arg)
+            myfunctions = myfunctions + functionsdata
         else:
-            print("Argument " + arg + " is no a valid path")
+            print("Argument " + arg + " is no a valid .yml file")
             return 1
 
     create_my_functions_file(myfunctions)
     return 0
 
-def parse_yml_file(path: str,filename: str) -> {}:
-    if not path.endswith("/"):
-        path = path+"/"
+def parse_yml_file(filename) -> {}:
     functionsdata = []
-    # if path.startswith("./"):
-        # data['name'] = path[2:]
-    # else:
-        # data['name'] = path
-    # data['name'] += "/"+file[:-4]
-    # print(data['name'])
 
-
-    with open(path+filename, 'r') as stream:
+    with open(filename, "r") as stream:
         try:
             function = yaml.load(stream)
-            data = {}
             for key in function['functions']:
+                data = {}
                 data['name'] = key
                 data['address'] = "function/" + key
-                data['weight'] = function['functions'][key]['extras']['weight']
-            # print(data)
-            functionsdata.append(data)
+
+                try:
+                    data['cloudOnly'] = function['functions'][key]['extras']['cloudOnly']
+                except Exception as e:
+                    data['cloudOnly'] = False
+
+                # print(data)
+                functionsdata.append(data)
         except yaml.YAMLError as exc:
             print(exc)
 
