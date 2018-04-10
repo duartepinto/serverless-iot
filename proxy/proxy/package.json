@@ -11,8 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "request": "^2.83.0",
-    "sync-request": "^6.0.0"
+    "request": "^2.83.0"
   },
   "devDependencies": {}
 }

@@ -5,7 +5,6 @@
 'use strict';
 
 const request = require('request')
-const syncRequest = require('sync-request')
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
@@ -22,16 +21,19 @@ function handle(req) {
 
     var reqFunc
     var reqData
+    var reqOptions
     var func  
 
     try{
         req = JSON.parse(req)
         reqFunc  = req.func;
         reqData = req.data
+        reqOptions = req.options
 
         for(var i = 0; i < funcsConfig.length; i++) {
             if(reqFunc == funcsConfig[i].name){
                 func = funcsConfig[i]
+                func.requestOptions = reqOptions
                 break
             }
 
@@ -39,19 +41,27 @@ function handle(req) {
                 throw new Error("function not found")
         }
     }catch (err) {
-        data.status= "error"
+        data.status= "error2"
         data.message = "" + err
         console.info(JSON.stringify(data))
         return 
     }
     var url
-    var isLocal = functionDeployed(func)
+    var isLocalPromise = functionDeployed(func)
 
-    if(isLocal){
-        makeLocalRequest(func.address, reqData)
-    }else{
-        makeCloudRequest(func, reqData)
-    }
+    isLocalPromise.then((result) =>{
+        if(result){
+            makeLocalRequest(func.address, reqData)
+        }else{
+            makeCloudRequest(func, reqData)
+        }
+    }, (err) => {
+        var body = {}
+        body.status = "error3"
+        body.message = err
+        console.info(JSON.stringify(body))
+    }) 
+    
 }
 
 function makeLocalRequest(functionAddress, reqData){
@@ -62,7 +72,7 @@ function makeLocalRequest(functionAddress, reqData){
 
 function makeCloudRequest(func, reqData){
     var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
-    var initTime = process.hrtime()[0]
+    var initTime = process.hrtime()
     url += "/" + func.address 
 
     request.post({url,json: reqData}, ( function(err,resp,body){
@@ -75,38 +85,65 @@ function responseLocal(err,resp, body){
 }
 
 function responseCloud(err, resp, body, func , reqData, initTime){
-    if(err === undefined){
-        var duration = process.hrtime()[0] - initTime
-        console.info(JSON.stringify(body))
-        var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
-        var durationReqbody = {func: func.name, duration: duration}
-        request.post({url, json: durationReqbody})
-        return
-    }else{
+    if(err){
         makeLocalRequest(func.address, reqData)
+        return
     }
-}
-
-// This function needs to be atomic (or at least guarantee consistency)
-function functionDeployed(func){
-    if(func.cloudOnly === true)
-        return true
-
-    var functionWeights = getFunctionWeights(func);
-
-    functionWeights.then(function(result){
-        if(functionWeights.cloudWeight > functionWeights.localWeight){
-            return true
-        }else{
-            return false
-        }
-    })
+    var timeElapsed = getTimeElapsed(initTime)
     
+    console.info(JSON.stringify(body))
+
+    sendCloudFunctionTimeElapsed(func,timeElapsed)
 }
 
-//TODO IMPLEMENT
-function getFunctionWeights(){
+function sendCloudFunctionTimeElapsed(func, timeElapsed){
 
+    var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
+    var durationReqbody = {func: func.name, duration: timeElapsed}
+    return request.post({url, json: durationReqbody})
+}
+
+function getTimeElapsed(initTime){
+    const NS_PER_SEC = 1e9
+
+    var diff = process.hrtime(initTime) 
+    var timeElapsed = diff[0] * NS_PER_SEC + diff[1]
+    return timeElapsed/ NS_PER_SEC
+}
+
+function functionDeployed(func){
+
+    var reqBody = { func: func.name, query:"average_duration_seconds" }
+    var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/weight_scale"
+
+    return new Promise((resolve, reject) => {
+        if(func.cloudOnly === true || 
+            (func.requestOptions !== undefined && func.requestOptions.forceCloud === true ))
+            return resolve(false)
+        request.post({url, json: reqBody}, (error, response, body) => {
+            if(error || body.status !== "success") {
+                return reject(error)
+            }
+
+            // If one of the weights is null it will random the execution
+            if(body.cloudWeight === null || body.localWeight === null){
+                var rnd = Math.floor(Math.random() * Math.floor(2))
+
+                if(rnd === 0){
+                    return resolve(true)
+                }else{
+                    return resolve(false)
+                }
+            }
+            
+            if(body.cloudWeight > body.localWeight){
+                return resolve(true)
+            }else{
+                return resolve(false)
+            }
+        })
+
+    })
 }
 
 module.exports = (req,res) => {

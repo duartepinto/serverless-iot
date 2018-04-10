@@ -3,10 +3,10 @@ provider:
   gateway: http://127.0.0.1:8080
 
 functions:
-  weight-scale:
+  weight_scale:
     lang: node
-    handler: ./thing/weight-scale
-    image: thing/weight-scale
+    handler: ./proxy/weight_scale
+    image: proxy/weight_scale
     build:
         extra-files:
             from: .config/my_functions.json

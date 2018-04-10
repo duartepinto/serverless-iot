@@ -47,12 +47,12 @@ echo "Testing functions"
 #set -x 
 set -v
 
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_light", "data":{"value": true}}'
+curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_light", "data":{"value": true}}'
 
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_heavy", "data":{"value": false}}'
+curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_heavy", "data":{"value": false}}'
 
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_super_heavy", "data":{"value": true}}'
+curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_super_heavy", "data":{"value": true}}'
 
-curl --silent "http://$LOCAL_IP/function/middleware" -d '{"func":"func_obese_heavy", "data":{"value": false}}'
+curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_obese_heavy", "data":{"value": false}}'
 
 set +v
