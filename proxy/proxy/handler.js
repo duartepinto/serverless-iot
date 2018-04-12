@@ -86,8 +86,15 @@ function responseLocal(err,resp, body){
 
 function responseCloud(err, resp, body, func , reqData, initTime){
     if(err){
-        makeLocalRequest(func.address, reqData)
-        return
+        if(!func.cloudOnly)
+            return makeLocalRequest(func.address, reqData)
+        else{
+            var data = {}
+            data.status = "error"
+            data.message = "Could not reach the server" + 
+                rigConfigs.serverUrl + ":" + rigConfigs.serverPort + "and execute the cloudOnly request"
+        }
+
     }
     var timeElapsed = getTimeElapsed(initTime)
     
@@ -97,7 +104,6 @@ function responseCloud(err, resp, body, func , reqData, initTime){
 }
 
 function sendCloudFunctionTimeElapsed(func, timeElapsed){
-
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
     var durationReqbody = {func: func.name, duration: timeElapsed}
     return request.post({url, json: durationReqbody})

@@ -31,9 +31,10 @@ function handle(req) {
 
     var reqFunc
     var reqQuery
+
     var func
     var query
-
+    
     try{
         req = JSON.parse(req)
         reqFunc  = req.func;
@@ -63,7 +64,13 @@ function handle(req) {
     var localPromise = getLocalWeight(reqFunc, query.query)
     var cloudPromise = getCloudWeight(reqFunc, query.query)
     
-    Promise.all([localPromise, cloudPromise]).then(returnWeights)
+    Promise.all([localPromise, cloudPromise])
+        .then(returnWeights)
+        .catch( (err) => {
+            data.status= "error"
+            data.message = "" + err
+            return console.info(JSON.stringify(data))
+        })
     //Promise.all([localPromise]).then(returnWeights)
 
 }
