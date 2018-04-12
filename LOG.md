@@ -12,3 +12,5 @@ This log is used to keep track of decisions that were made
         * gateway_functions_seconds_count - Number of invocations of the function (similiar to gateway_function_invocation_total)
     * gateway_function_invocation_total - Number of invocations of the function
     * gateway_service_count - Number of replicas for each available for each function
+* To keep metrics about functions running on the cloud I've used a MongoDB. Implementation based on this https://github.com/alexellis/mongodb-function
+
