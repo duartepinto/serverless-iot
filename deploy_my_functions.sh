@@ -9,7 +9,7 @@ do
 key="$1"
 
 case $key in
-    -s|--example_functions)
+    -s|--server)
     SERVER=true
     shift # past argument
     ;;
@@ -59,9 +59,9 @@ ln -s ../../.config/my_functions.json ./proxy/get_duration/my_functions.json
 #BUILD FUNCTIONS
 if [ "$CACHE" = true ];
 then
-    sudo faas-cli build -f ./example_stack.yml
+    sudo faas-cli build -f ./example_functions/stack.yml
 else
-    sudo faas-cli build -f ./example_stack.yml --no-cache
+    sudo faas-cli build -f ./example_functions/stack.yml --no-cache
 fi
 
 if [ "$SERVER" = false ];
@@ -81,7 +81,7 @@ then
 fi
 
 #DEPLOY FUNCTIONS
-faas-cli deploy -f ./example_stack.yml
+faas-cli deploy -f ./example_functions/stack.yml
 
 if [ "$SERVER" = false ];
 then

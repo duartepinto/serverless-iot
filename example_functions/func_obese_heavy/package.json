@@ -11,8 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "request": "^2.83.0"
+    "fs": "0.0.1-security"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
