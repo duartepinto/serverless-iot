@@ -9,7 +9,7 @@ do
 key="$1"
 
 case $key in
-    -s|--example_functions)
+    -s|--server)
     SERVER=true
     shift # past argument
     ;;
@@ -18,7 +18,7 @@ case $key in
     shift # past argument
     ;;
     *)    # unknown option
-    print >&2 "Usage: $0 [-d|--development-mode] [-s|--example_functions] "
+    print >&2 "Usage: $0 [-d|--development-mode] [-s|--sample-functions] "
     exit 1;;
     #:  ) echo "Missing option argument for -$OPTARG" >&2;
         #exit 1;;
@@ -28,15 +28,15 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 
 # CREATING SYMLINKS FOR DEV
-echo Creating symlinks for example_functions
-rm ./example_functions/func_light/my_rig_config.json
-rm ./example_functions/func_heavy/my_rig_config.json
-rm ./example_functions/func_super_heavy/my_rig_config.json
-rm ./example_functions/func_obese_heavy/my_rig_config.json
-ln -s ../../my_rig_config.json ./example_functions/func_light/my_rig_config.json
-ln -s ../../my_rig_config.json ./example_functions/func_heavy/my_rig_config.json
-ln -s ../../my_rig_config.json ./example_functions/func_super_heavy/my_rig_config.json
-ln -s ../../my_rig_config.json ./example_functions/func_obese_heavy/my_rig_config.json
+echo Creating symlinks for sample-functions
+rm ./sample-functions/func_light/my_rig_config.json
+rm ./sample-functions/func_heavy/my_rig_config.json
+rm ./sample-functions/func_super_heavy/my_rig_config.json
+rm ./sample-functions/func_obese_heavy/my_rig_config.json
+ln -s ../../my_rig_config.json ./sample-functions/func_light/my_rig_config.json
+ln -s ../../my_rig_config.json ./sample-functions/func_heavy/my_rig_config.json
+ln -s ../../my_rig_config.json ./sample-functions/func_super_heavy/my_rig_config.json
+ln -s ../../my_rig_config.json ./sample-functions/func_obese_heavy/my_rig_config.json
 
 echo Creating symlinks for proxy functions 
 rm ./proxy/proxy/my_functions.json
@@ -59,9 +59,9 @@ ln -s ../../.config/my_functions.json ./proxy/get_duration/my_functions.json
 #BUILD FUNCTIONS
 if [ "$CACHE" = true ];
 then
-    sudo faas-cli build -f ./example_stack.yml
+    sudo faas-cli build -f ./sample-functions/stack.yml
 else
-    sudo faas-cli build -f ./example_stack.yml --no-cache
+    sudo faas-cli build -f ./sample-functions/stack.yml --no-cache
 fi
 
 if [ "$SERVER" = false ];
@@ -81,7 +81,7 @@ then
 fi
 
 #DEPLOY FUNCTIONS
-faas-cli deploy -f ./example_stack.yml
+faas-cli deploy -f ./sample-functions/stack.yml
 
 if [ "$SERVER" = false ];
 then

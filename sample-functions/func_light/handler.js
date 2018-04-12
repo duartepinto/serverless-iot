@@ -4,14 +4,12 @@
 /*jshint asi: true */
 'use strict';
 
-const request = require('request')
+const fs = require('fs');
 
-const rigConfig = require('./my_rig_config.json')
-
-var data = {}
 var value 
 
 function handle(req) {
+    var data = {}
     if(req == undefined || req == null){
         data.status= "error"
         console.info(JSON.stringify(data))
@@ -26,15 +24,20 @@ function handle(req) {
         return 
     }
 
-
-    request.post({url: rigConfig.localUrl+":"+rigConfig.localPort+"/function/func_nodeinfo", json:{}}, uponNodeInfoReq)
-
-    return
+    fs.readFile("/etc/hostname", "utf8", uponNodeInfo)
 }
 
-function uponNodeInfoReq(err, response, body){
+function uponNodeInfo(err, body){
+    var data = {}
+    if(err){
+        data.status = "error"
+        data.message = "Error requesting node info"
+        data.error = err
+        return console.info(JSON.stringify(data))
+    }
+
     data.nodeInfo = body
-    data.message = "I was able to achieve this result using OBESE HEAVY calculations"
+    data.message = "I was able to achieve this result using LIGHT calculations"
     data.status = assertValue(value)
     console.info(JSON.stringify(data))
 }
