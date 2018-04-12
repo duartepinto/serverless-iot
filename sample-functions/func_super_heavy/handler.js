@@ -5,7 +5,7 @@
 'use strict';
 
 const fs = require('fs');
-const sleep = require('sleep')
+const sleep = require('thread-sleep')
 
 const rigConfigs = require('./my_rig_config.json')
 
@@ -28,9 +28,9 @@ function handle(req) {
     }
 
     if(rigConfigs.thing)
-        sleep.sleep(10)
+        sleep(4000)
     else
-        sleep.sleep(5)
+        sleep(2000)
 
 
     fs.readFile("/etc/hostname", "utf8", uponNodeInfo)
