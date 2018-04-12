@@ -6,6 +6,8 @@
 
 const fs = require('fs');
 
+const rigConfigs = require('./my_rig_config.json')
+
 var value 
 
 function handle(req) {
@@ -37,6 +39,7 @@ function uponNodeInfo(err, body){
     }
 
     data.nodeInfo = body
+    data.swarm = rigConfigs.name
     data.message = "I was able to achieve this result using LIGHT calculations"
     data.status = assertValue(value)
     console.info(JSON.stringify(data))

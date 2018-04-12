@@ -45,6 +45,7 @@ function uponNodeInfo(err, body){
     }
 
     data.nodeInfo = body
+    data.swarm = rigConfigs.name
     data.message = "I was able to achieve this result using HEAVY calculations"
     data.status = assertValue(value)
     console.info(JSON.stringify(data))
