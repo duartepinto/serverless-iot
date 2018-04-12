@@ -5,6 +5,9 @@
 'use strict';
 
 const fs = require('fs');
+const sleep = require('thread-sleep')
+
+const rigConfigs = require('./my_rig_config.json')
 
 var value 
 
@@ -23,6 +26,12 @@ function handle(req) {
         console.info(JSON.stringify(data))
         return 
     }
+
+    if(rigConfigs.thing)
+        sleep(4000)
+    else
+        sleep(2000)
+
 
     fs.readFile("/etc/hostname", "utf8", uponNodeInfo)
 }
