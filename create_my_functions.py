@@ -37,6 +37,11 @@ def parse_yml_file(filename) -> {}:
                 except Exception as e:
                     data['cloudOnly'] = False
 
+                try:
+                    data['localOnly'] = function['functions'][key]['extras']['localOnly']
+                except Exception as e:
+                    data['localOnly'] = False
+
                 # print(data)
                 functionsdata.append(data)
         except yaml.YAMLError as exc:
@@ -53,6 +58,7 @@ def create_my_functions_file(myfunctions: []):
 
 # Sadly, Python fails to provide the following magic number for us.
 ERROR_INVALID_NAME = 123
+
 '''
 Windows-specific error code indicating an invalid pathname.
 

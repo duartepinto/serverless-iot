@@ -101,6 +101,7 @@ function responseCloud(err, resp, body, func , reqData, initTime){
     console.info(JSON.stringify(body))
 
     sendCloudFunctionTimeElapsed(func,timeElapsed)
+    return 
 }
 
 function sendCloudFunctionTimeElapsed(func, timeElapsed){
@@ -117,15 +118,28 @@ function getTimeElapsed(initTime){
     return timeElapsed/ NS_PER_SEC
 }
 
+function cloudDeployConfiguration(func){
+return func.cloudOnly === true && 
+        (func.requestOptions === undefined || func.requestOptions.forceLocal === false) || 
+            (func.requestOptions !== undefined && func.requestOptions.forceCloud === true)
+}
+
+function localDeployConfiguration(func){
+return func.localOnly === true && 
+        (func.requestOptions === undefined || func.requestOptions.forceCloud === false) || 
+            (func.requestOptions !== undefined && func.requestOptions.forceLocal === false )
+}
+
 function functionDeployed(func){
 
     var reqBody = { func: func.name, query:"average_duration_seconds" }
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/weight_scale"
 
     return new Promise((resolve, reject) => {
-        if(func.cloudOnly === true || 
-            (func.requestOptions !== undefined && func.requestOptions.forceCloud === true ))
+        if(cloudDeployConfiguration(func))
             return resolve(false)
+        if(localDeployConfiguration(func))
+            return resolve(true)
         request.post({url, json: reqBody}, (error, response, body) => {
             if(error || body.status !== "success") {
                 return reject(error)

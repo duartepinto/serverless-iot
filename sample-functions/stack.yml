@@ -8,7 +8,6 @@ functions:
     handler: ./sample-functions/func_obese_heavy
     image: sample-functions/func_obese_heavy
     extras:
-        weight: 9007199254740991
         cloudOnly: true
     build:
         extra-files:
@@ -18,8 +17,6 @@ functions:
     lang: node
     handler: ./sample-functions/func_super_heavy
     image: sample-functions/func_super_heavy
-    extras:
-        weight: 1000
     build:
         extra-files:
             from: ./my_rig_config.json
@@ -28,8 +25,6 @@ functions:
     lang: node
     handler: ./sample-functions/func_heavy
     image: sample-functions/func_heavy
-    extras:
-        weight: 100
     build:
         extra-files:
             from: ./my_rig_config.json
@@ -38,8 +33,6 @@ functions:
     lang: node
     handler: ./sample-functions/func_light
     image: sample-functions/func_light
-    extras: 
-        weight: 10
     build:
         extra-files:
             from: ./my_rig_config.json
