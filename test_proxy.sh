@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LOCAL_IP="127.0.0.1:8080"
-IP_CLOUD="192.168.78.128"
+IP_CLOUD="18.196.210.14"
 PORT_CLOUD="8080" 
 CONNECTION=true
 
@@ -47,12 +47,16 @@ echo "Testing functions"
 #set -x 
 set -v
 
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_light","query":"average_duration_seconds"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_light", "data":{"value": true}}'
 
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_heavy","query":"average_duration_seconds"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_heavy", "data":{"value": false}}'
 
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_super_heavy","query":"average_duration_seconds"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_super_heavy", "data":{"value": true}}'
 
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_obese_heavy","query":"average_duration_seconds"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_obese_heavy", "data":{"value": false}}'
 
 set +v

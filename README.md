@@ -33,15 +33,14 @@ $ git clone https://github.com/openfaas/faas && \
   git checkout 0.7.7 && \
   cd ..
 ```
-2. Initiate a docker swarm
+2. Initiate a docker swarm. In some cases, the flag _--advertise-addr_ might be needed to specify the advertised address.
 ``` 
 $ sudo docker swarm init
 ```
-In some cases, the flag _--advertise-addr_ might be needed to specify the advertised address.
-    
+
 3. Deploy faas and remove unnecessary functions that come preinstalled.
 ``` 
-$ sh sudo ./deploy_faas.sh
+$ sudo ./deploy_faas.sh
 ```
 
 4. Continue instalation process process for [IoT swarm](#inst_swarm_local) or [Cloud swarm](#inst_swarm_cloud)
@@ -59,7 +58,7 @@ $ python3 create_my_functions.py
 3. Deploy my functions.
 
 ``` 
-$ sh sudo ./deploy_my_functions.sh
+$ sudo ./deploy_my_functions.sh
 ```
 
 ### <a name="inst_swarm_cloud"></a> (Cont.) Instalation in the cloud swarm (Server)
@@ -70,6 +69,6 @@ $ python3 create_my_functions.py
 2. Deploy my functions.
 
 ``` 
-$ sh sudo ./deploy_my_functions.sh
+$ sudo ./deploy_my_functions.sh --server
 ```
 
