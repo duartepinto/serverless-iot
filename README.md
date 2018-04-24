@@ -54,7 +54,7 @@ $ docker service create --network=func_functions --name openfaas-db-mongodb --pu
 ```
 2. Create configuration files 
 ``` 
-$ python3 create_my_functions.py
+$ python3 create_my_functions.py sample-functions/stack.yml
 ```
 3. Deploy my functions.
 
