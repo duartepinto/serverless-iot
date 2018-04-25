@@ -53,7 +53,7 @@ function handle(req) {
         else
             query = queryList[reqQuery]
     }catch (err) {
-        data.status= "error"
+        data.status= "error1"
         data.message = "" + err
         console.info(JSON.stringify(data))
         return 
@@ -67,7 +67,14 @@ function handle(req) {
             switch(query){
                 case queryList.mab_duration_seconds:
                     data.status = "success"
-                    data.result = results
+
+                    var t = results[0][0] + results[1].length
+                    
+                    var cloudExpectedUCB = getOptionExpectedUCB(t, results[1].map( a => a.duration))
+                    //var localExpectedUCB = getOptionExpectedUCB(t, results[0].map( a => a.duration))
+                    var cloudWeight = 1 / cloudExpectedUCB
+
+                    data.cloudWeight = cloudWeight
 
                     return console.info(JSON.stringify(data))
                     break
@@ -76,14 +83,14 @@ function handle(req) {
                     returnWeights(results)
                     break
                 default:
-                    data.status = "error"
+                    data.status = "error 4"
                     data.result = results
                     return console.info(JSON.stringify(data))
 
             }
         })
         .catch( (err) => {
-            data.status= "error"
+            data.status= "error 5"
             data.message = "" + err
             return console.info(JSON.stringify(data))
         })
@@ -218,6 +225,32 @@ function getCloudWeight(functionName, query){
                 return resolve(null)
         }
     })
+}
+
+function getOptionExpectedUCB(t, rewardList){
+    return getExpectedReward(rewardList) + getUCB1(t, rewardList.length)
+}
+
+
+function getUCB1(t, nTrialsOption){
+    return Math.sqrt(2*Math.log(t)/nTrialsOption)
+}
+
+function getExpectedReward(rewardList){
+    return 1/rewardList.length * getMabSumReward(rewardList)
+}
+
+function getMabSumReward(items){
+    var sum = 0; 
+    for(var i = 0; i < items.length; i++){
+        sum += getMabReward(items[i])
+    }
+
+    return sum
+}
+
+function getMabReward(duration){
+    return 1/duration
 }
 
 function getAvgDuration(items){
