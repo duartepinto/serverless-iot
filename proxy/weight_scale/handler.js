@@ -228,8 +228,9 @@ function getCloudWeight(functionName, query){
 }
 
 function getOptionExpectedUCB(t, rewardList){
-    return getExpectedReward(rewardList) + getUCB1(t, rewardList.length)
+    return getExpectedReward(rewardList) + getUCB1(t + 1, rewardList.length+1)
 }
+
 
 
 function getUCB1(t, nTrialsOption){
