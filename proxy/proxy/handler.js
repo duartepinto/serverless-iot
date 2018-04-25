@@ -119,7 +119,6 @@ function sendLocalFunctionTimeElapsed(func, timeElapsed){
 }
 
 function sendTimeElasped(func, timeElapsed, environment){
-    console.log(environment)
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
     var durationReqbody = {func: func.name, environment: environment,duration: timeElapsed}
     return request.post({url, json: durationReqbody})
@@ -148,7 +147,7 @@ return func.localOnly === true &&
 
 function functionDeployed(func){
 
-    var reqBody = { func: func.name, query:"average_duration_seconds" }
+    var reqBody = { func: func.name, query:"mab_duration_seconds" }
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/weight_scale"
 
     return new Promise((resolve, reject) => {

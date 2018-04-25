@@ -59,28 +59,33 @@ function handle(req) {
         return 
     }
 
-    var localPromise = getLocalWeight(reqFunc, query)
-    var cloudPromise = getCloudWeight(reqFunc, query)
+    var weightPromise = getDurations(reqFunc, query)
     
-    Promise.all([localPromise, cloudPromise])
+    weightPromise 
         .then((results) =>{ 
             switch(query){
                 case queryList.mab_duration_seconds:
                     data.status = "success"
 
-                    var t = results[0][0] + results[1].length
+                    var t = results.localList.length + results.cloudList.length
                     
-                    var cloudExpectedUCB = getOptionExpectedUCB(t, results[1].map( a => a.duration))
-                    //var localExpectedUCB = getOptionExpectedUCB(t, results[0].map( a => a.duration))
+                    var localExpectedUCB = getOptionExpectedUCB(t, results.localList)
+                    var cloudExpectedUCB = getOptionExpectedUCB(t, results.cloudList)
+
+                    var localWeight = 1 / localExpectedUCB
                     var cloudWeight = 1 / cloudExpectedUCB
 
+                    data.localWeight = localWeight
                     data.cloudWeight = cloudWeight
 
                     return console.info(JSON.stringify(data))
                     break
 
                 case queryList.average_duration_seconds:
-                    returnWeights(results)
+                    localWeight = getAvgDuration(results.localList)
+                    cloudWeight = getAvgDuration(results.cloudList)
+
+                    returnWeights([localWeight,cloudWeight])
                     break
                 default:
                     data.status = "error 4"
@@ -104,83 +109,7 @@ function returnWeights(results) {
     console.info(JSON.stringify(body))
 }
 
-function getLocalWeight(functionName, query){
-    var host = rigConfigs.localUrl + ":" +  rigConfigs.prometheusPort
-    var path = "/api/v1/query"
-
-    return new Promise(function(resolve, reject){
-
-        switch(query){
-
-            case queryList.mab_duration_seconds:
-                var parameters1 = "?query=" + query.queryCount + '{function_name="'+functionName + '"}'
-                var parameters2 = "?query=" + query.querySecondsSum + '{function_name="'+functionName + '"}'
-                var urlCount = host + path + parameters1
-                var urlSecondsSum = host + path + parameters2
-
-                var promiseCount = new Promise( (countResolve, countReject) => {
-                    request.get(urlCount, function(err, resp, body) {
-                        if (err) {
-                            return reject(err);
-                        } else {
-                            body = JSON.parse(body)
-                            if(body.status === "success" && body.data.result[0] != undefined){
-                                return countResolve(body.data.result[0].value[1])
-                            }
-                            countResolve(null)
-                        }
-                    })
-
-                })
-
-                var promiseSum = new Promise( (sumResolve, sumReject) => {
-                    request.get(urlSecondsSum, function(err, resp, body) {
-                        if (err) {
-                            return sumReject(err);
-                        } else {
-                            body = JSON.parse(body)
-                            if(body.status === "success" && body.data.result[0] != undefined){
-                                return sumResolve(body.data.result[0].value[1])
-                            }
-                            sumResolve(null)
-                        }
-                    })
-                })
-                Promise.all([promiseCount, promiseSum])
-                    .then(results =>{ 
-                        resolve(results)
-                    }).catch((err) => {
-                        reject(err)
-                    })
-
-                break
-
-            case queryList.average_duration_weight:
-                var parameters = "?query=" + query.query + '{function_name="'+functionName + '"}'
-
-                var url = host + path + parameters
-
-                request.get(url, function(err, resp, body) {
-                    if (err) {
-                        return reject(err);
-                    } else {
-                        body = JSON.parse(body)
-                        if(body.status === "success" && body.data.result[0] != undefined){
-                            return resolve(body.data.result[0].value[1])
-                        }
-                        
-                        resolve(null)
-                    }
-                })
-                break
-            default:
-                resolve(null)
-        }
-        
-    })
-}
-
-function getCloudWeight(functionName, query){
+function getDurations(functionName, query){
     var host = rigConfigs.localUrl + ":" +  rigConfigs.localPort
     var path = "/function/get_duration"
 
@@ -190,30 +119,24 @@ function getCloudWeight(functionName, query){
     return new Promise(function(resolve, reject){
         switch(query){
             case queryList.mab_duration_seconds: 
-                request.post({url, json: body}, function(err, resp, body) {
-                    if (err) {
-                        reject(err);
-                        resolve(null)
-                    } else {
-                        if(body.status === "success" && body.items.length > 0){
-                            return resolve(body.items)
-                        }
-                        
-                        return resolve(null)
-                    }
-                })
-
-                break
             case queryList.average_duration_seconds:
-
                 request.post({url, json: body}, function(err, resp, body) {
                     if (err) {
                         reject(err);
                         resolve(null)
                     } else {
                         if(body.status === "success" && body.items.length > 0){
-                            var avgDuration = getAvgDuration(body.items)
-                            return resolve(avgDuration)
+                            var localList = body.items
+                                .filter( a => a.environment == "local")
+                                .map(a => a.duration)
+
+                            var cloudList = body.items.
+                                filter( a => a.environment == "cloud").
+                                map(a => a.duration)
+
+                            var durationsList = {localList: localList,
+                                cloudList:cloudList}
+                            return resolve(durationsList)
                         }
                         
                         return resolve(null)
@@ -231,14 +154,12 @@ function getOptionExpectedUCB(t, rewardList){
     return getExpectedReward(rewardList) + getUCB1(t + 1, rewardList.length+1)
 }
 
-
-
 function getUCB1(t, nTrialsOption){
     return Math.sqrt(2*Math.log(t)/nTrialsOption)
 }
 
 function getExpectedReward(rewardList){
-    return 1/rewardList.length * getMabSumReward(rewardList)
+    return 1/(rewardList.length +1) * (getMabSumReward(rewardList) +1)
 }
 
 function getMabSumReward(items){
@@ -258,7 +179,7 @@ function getAvgDuration(items){
     var sum = 0;
     var length = items.length
     for (var i = 0; i < length; i++){
-        sum += items[i].duration;
+        sum += items[i];
     }
     return sum/length
 }
