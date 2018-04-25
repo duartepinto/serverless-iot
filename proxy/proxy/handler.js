@@ -51,7 +51,7 @@ function handle(req) {
 
     isLocalPromise.then((result) =>{
         if(result){
-            makeLocalRequest(func.address, reqData)
+            makeLocalRequest(func, reqData)
         }else{
             makeCloudRequest(func, reqData)
         }
@@ -64,10 +64,13 @@ function handle(req) {
     
 }
 
-function makeLocalRequest(functionAddress, reqData){
+function makeLocalRequest(func, reqData){
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort
-    url += "/" + functionAddress
-    request.post({url,json: reqData}, responseLocal)
+    var initTime = process.hrtime()
+    url += "/" + func.address
+    request.post({url,json: reqData}, (err,resp,body) => {
+        responseLocal(err,resp,body,func,initTime)
+    })
 }
 
 function makeCloudRequest(func, reqData){
@@ -80,14 +83,17 @@ function makeCloudRequest(func, reqData){
     }))
 }
 
-function responseLocal(err,resp, body){
+function responseLocal(err,resp, body,func, initTime){
+    var timeElapsed = getTimeElapsed(initTime)
     console.info(JSON.stringify(body))
+    sendLocalFunctionTimeElapsed(func, timeElapsed)
+    return 
 }
 
 function responseCloud(err, resp, body, func , reqData, initTime){
     if(err){
         if(!func.cloudOnly)
-            return makeLocalRequest(func.address, reqData)
+            return makeLocalRequest(func, reqData)
         else{
             var data = {}
             data.status = "error"
@@ -105,8 +111,17 @@ function responseCloud(err, resp, body, func , reqData, initTime){
 }
 
 function sendCloudFunctionTimeElapsed(func, timeElapsed){
+    sendTimeElasped(func,timeElapsed,"cloud")
+}
+
+function sendLocalFunctionTimeElapsed(func, timeElapsed){
+    sendTimeElasped(func,timeElapsed,"local")
+}
+
+function sendTimeElasped(func, timeElapsed, environment){
+    console.log(environment)
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/insert_duration"
-    var durationReqbody = {func: func.name, duration: timeElapsed}
+    var durationReqbody = {func: func.name, environment: environment,duration: timeElapsed}
     return request.post({url, json: durationReqbody})
 }
 
@@ -125,9 +140,10 @@ return func.cloudOnly === true &&
 }
 
 function localDeployConfiguration(func){
+
 return func.localOnly === true && 
         (func.requestOptions === undefined || func.requestOptions.forceCloud === false) || 
-            (func.requestOptions !== undefined && func.requestOptions.forceLocal === false )
+            (func.requestOptions !== undefined && func.requestOptions.forceLocal === true )
 }
 
 function functionDeployed(func){

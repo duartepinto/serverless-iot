@@ -22,12 +22,14 @@ function handle(event, context) {
 
     var duration
     var functionName
+    var environment
 
     var func
     var body = event.body
     try{
         functionName = body.func;
         duration = body.duration
+        environment = body.environment
 
         for(var i = 0; i < funcsConfig.length; i++) {
             if(functionName == funcsConfig[i].name){
@@ -46,7 +48,7 @@ function handle(event, context) {
 
     prepareDB()
     .then((stats) => {
-        const record = {"function": func.name, "duration": duration};
+        const record = {"function": func.name, "duration": duration, "environment": environment };
 
         stats.collection("stats").insertOne(record, (insertErr) => {
             if(insertErr) {
