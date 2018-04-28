@@ -125,7 +125,7 @@ function getDurations(functionName, query){
                         reject(err);
                         resolve(null)
                     } else {
-                        if(body.status === "success" && body.items.length > 0){
+                        if(body.status === "success"){
                             var localList = body.items
                                 .filter( a => a.environment == "local")
                                 .map(a => a.duration)
@@ -134,24 +134,25 @@ function getDurations(functionName, query){
                                 filter( a => a.environment == "cloud").
                                 map(a => a.duration)
 
+
                             var durationsList = {localList: localList,
                                 cloudList:cloudList}
                             return resolve(durationsList)
                         }
                         
-                        return resolve(null)
+                        return reject(err)
                     }
                 })
 
                 break
             default:
-                return resolve(null)
+                return reject("Bad query 1")
         }
     })
 }
 
 function getOptionExpectedUCB(t, rewardList){
-    return getExpectedReward(rewardList) + getUCB1(t + 1, rewardList.length+1)
+    return getExpectedReward(rewardList) + getUCB1(t, rewardList.length)
 }
 
 function getUCB1(t, nTrialsOption){
@@ -159,7 +160,7 @@ function getUCB1(t, nTrialsOption){
 }
 
 function getExpectedReward(rewardList){
-    return 1/(rewardList.length +1) * (getMabSumReward(rewardList) +1)
+    return 1/(rewardList.length) * getMabSumReward(rewardList)
 }
 
 function getMabSumReward(items){
