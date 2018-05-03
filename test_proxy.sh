@@ -4,6 +4,7 @@ LOCAL_IP="127.0.0.1:8080"
 IP_CLOUD="18.196.210.14"
 PORT_CLOUD="8080" 
 CONNECTION=true
+N=1
 
 while [[ $# -gt 0 ]]
 do
@@ -17,6 +18,11 @@ case $key in
     ;;
     -p|--port-cloud)
     PORT_CLOUD="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -n)
+    N="$2"
     shift # past argument
     shift # past value
     ;;
@@ -47,6 +53,8 @@ echo "Testing functions"
 #set -x 
 set -v
 
+for i in `seq 2 $N`
+do
 curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_light","query":"average_duration_seconds"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_light", "data":{"value": true}}'
 
@@ -59,4 +67,5 @@ curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_super_heavy", 
 curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_obese_heavy","query":"average_duration_seconds"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_obese_heavy", "data":{"value": false}}'
 
+done
 set +v
