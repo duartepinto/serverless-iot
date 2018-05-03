@@ -13,4 +13,4 @@ This log is used to keep track of decisions that were made
     * gateway_function_invocation_total - Number of invocations of the function
     * gateway_service_count - Number of replicas for each available for each function
 * To keep metrics about functions running on the cloud I've used a MongoDB. Implementation based on this https://github.com/alexellis/mongodb-function
-
+* To measure the weights based on the duration history of the functions, I've used the __Multi-armded bandit__ with _Upper bound_
