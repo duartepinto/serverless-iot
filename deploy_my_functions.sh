@@ -55,6 +55,8 @@ ln -s ../../my_rig_config.json ./proxy/insert_duration/my_rig_config.json
 ln -s ../../.config/my_functions.json ./proxy/insert_duration/my_functions.json
 ln -s ../../my_rig_config.json ./proxy/get_duration/my_rig_config.json
 ln -s ../../.config/my_functions.json ./proxy/get_duration/my_functions.json
+ln -s ../../my_rig_config.json ./proxy/get_overall_stats/my_rig_config.json
+ln -s ../../.config/my_functions.json ./proxy/get_overall_stats/my_functions.json
 
 #BUILD FUNCTIONS
 if [ "$CACHE" = true ];
@@ -72,11 +74,13 @@ then
         sudo faas-cli build -f proxy/weight_scale.yml 
         sudo faas-cli build -f proxy/insert_duration.yml 
         sudo faas-cli build -f proxy/get_duration.yml 
+        sudo faas-cli build -f proxy/get_overall_stats.yml 
     else
         sudo faas-cli build -f proxy/proxy.yml --no-cache
         sudo faas-cli build -f proxy/weight_scale.yml --no-cache
         sudo faas-cli build -f proxy/insert_duration.yml --no-cache
         sudo faas-cli build -f proxy/get_duration.yml --no-cache
+        sudo faas-cli build -f proxy/get_overall_stats.yml --no-cache
     fi
 fi
 
@@ -89,4 +93,6 @@ then
     faas-cli deploy -f proxy/weight_scale.yml
     faas-cli deploy -f proxy/insert_duration.yml
     faas-cli deploy -f proxy/get_duration.yml
+    faas-cli deploy -f proxy/get_overall_stats.yml
+
 fi
