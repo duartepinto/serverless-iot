@@ -31,7 +31,7 @@ case $key in
     shift # past argument
     ;;
     *)    # unknown option
-    print >&2 "Usage: $0 [--no-connection] [-a|--address-cloud   address-cloud] [-p|--port-cloud port-cloud] "
+    print >&2 "Usage: $0 [-n number of cicles for the test] [--no-connection] [-a|--address-cloud   address-cloud] [-p|--port-cloud port-cloud] "
     exit 1;;
 esac
 done
@@ -69,3 +69,6 @@ curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_obese_heavy", 
 
 done
 set +v
+
+echo "Function's Overall stats"
+curl "http://$LOCAL_IP/function/get_overall_stats" | json_pp
