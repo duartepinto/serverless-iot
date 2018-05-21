@@ -60,7 +60,7 @@ function handle(req) {
     }
 
     var weightPromise = getDurations(reqFunc, query)
-    
+
     weightPromise 
         .then((results) =>{ 
             switch(query){
@@ -173,7 +173,7 @@ function getMabSumReward(items){
 }
 
 function getMabReward(duration){
-    return 1/duration
+    return -duration
 }
 
 function getAvgDuration(items){
