@@ -192,7 +192,7 @@ function getMabSumReward(items){
 }
 
 function getMabReward(duration){
-    return -duration
+    return 1/(duration)
 }
 
 function getAvgDuration(items){

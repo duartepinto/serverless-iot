@@ -50,7 +50,6 @@ function handle(req) {
     var isLocalPromise = functionDeployed(func)
 
     isLocalPromise.then((environment) =>{
-        console.log(environment)
         if(environment === "local"){
             makeLocalRequest(func, reqData)
         }else{
@@ -153,9 +152,9 @@ function functionDeployed(func){
 
     return new Promise((resolve, reject) => {
         if(cloudDeployConfiguration(func))
-            return resolve(false)
+            return resolve(rigConfigs.servers[0])
         if(localDeployConfiguration(func))
-            return resolve(true)
+            return resolve("local")
         request.post({url, json: reqBody}, (error, response, body) => {
             if(error || body.status !== "success") {
                 return reject(error)
@@ -185,7 +184,7 @@ function functionDeployed(func){
             
             var minimumKey = Object.keys(body).reduce((a,b) => body[a] < body[b] ? a : b)
 
-            if(minimumKey === 'localWeight')
+            if(minimumKey === 'local')
                     return resolve("local")
 
             rigConfigs.servers.forEach(function(server){
