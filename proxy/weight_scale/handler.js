@@ -70,18 +70,11 @@ function handle(req) {
                 case queryList.bayesian_ucb:
                     data.status = "success"
 
-                    var t = 0;
-
-                    Object.keys(results).forEach((key) => {
-                        t += results[key].length
-                    })
-
                     var key 
                     var list
                     var expectedValue
                     var weight
 
-                    const c = 3
                     rigConfigs.servers.forEach((server) => {
                         key = server.name
                         list = results[server.name]
@@ -90,15 +83,14 @@ function handle(req) {
                             return
                         }
 
-
-                        expectedValue = jStat.median(list) + c*jStat.stdev(list)/ Math.sqrt(list.length)
+                        expectedValue = getValueBayesianUCB(list)
                         weight = 1 / expectedValue
                         data[key] = weight
                     })
 
                     key = "local"
                     list = results[key]
-                    expectedValue = jStat.median(list) + c*jStat.stdev(list)/ Math.sqrt(list.length)
+                    expectedValue = getValueBayesianUCB(list)
                     weight = 1 / expectedValue
                     data[key] = weight
 
@@ -107,7 +99,7 @@ function handle(req) {
                 case queryList.mab_duration_seconds:
                     data.status = "success"
 
-                    t = 0;
+                    let t = 0;
 
                     Object.keys(results).forEach((key) => {
                         t += results[key].length
@@ -121,7 +113,7 @@ function handle(req) {
                             return
                         }
 
-                        expectedValue = getOptionExpectedUCB(t, list)
+                        expectedValue = getValueUCB1(t, list)
                         weight = 1 / expectedValue
                         data[key] = weight
                     })
@@ -129,7 +121,7 @@ function handle(req) {
 
                     key = "local"
                     list = results[key]
-                    expectedValue = getOptionExpectedUCB(t, list)
+                    expectedValue = getValueUCB1(t, list)
                     weight = 1 / expectedValue
                     data[key] = weight
 
@@ -206,25 +198,21 @@ function getDurations(functionName, query){
     })
 }
 
-function getOptionExpectedUCB(t, rewardList){
-    return getExpectedReward(rewardList) + getUCB1(t, rewardList.length)
+function getValueBayesianUCB(list){
+    const c = 3
+    return jStat.median(list) + c*jStat.stdev(list)/ Math.sqrt(list.length)
 }
 
-function getUCB1(t, nTrialsOption){
+function getValueUCB1(t, rewardList){
+    return getExpectedReward(rewardList) + getUpperBoundUCB1(t, rewardList.length)
+}
+
+function getUpperBoundUCB1(t, nTrialsOption){
     return Math.sqrt(2*Math.log(t)/nTrialsOption)
 }
 
 function getExpectedReward(rewardList){
-    return 1/(rewardList.length) * getMabSumReward(rewardList)
-}
-
-function getMabSumReward(items){
-    var sum = 0; 
-    for(var i = 0; i < items.length; i++){
-        sum += getMabReward(items[i])
-    }
-
-    return sum
+    return 1/(rewardList.length) * jStat.sum(Array.from(rewardList, x => getMabReward(x)))
 }
 
 function getMabReward(duration){
