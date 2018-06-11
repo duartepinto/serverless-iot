@@ -5,6 +5,7 @@
 'use strict';
 
 const request = require('request')
+const jStat = require('jStat').jStat;
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
@@ -15,6 +16,8 @@ const queryList = {
     mab_duration_seconds : {
         querySecondsSum : "gateway_functions_seconds_sum",
         queryCount : "gateway_functions_seconds_count",
+    },
+    bayesian_ucb: {
     }
 }
 
@@ -64,28 +67,82 @@ function handle(req) {
     weightPromise 
         .then((results) =>{ 
             switch(query){
+                case queryList.bayesian_ucb:
+                    data.status = "success"
+
+                    var t = 0;
+
+                    Object.keys(results).forEach((key) => {
+                        t += results[key].length
+                    })
+
+                    var key 
+                    var list
+                    var expectedValue
+                    var weight
+
+                    const c = 3
+                    rigConfigs.servers.forEach((server) => {
+                        key = server.name
+                        list = results[server.name]
+                        if(list === undefined){
+                            data[key] = null
+                            return
+                        }
+
+
+                        expectedValue = jStat.median(list) + c*jStat.stdev(list)/ Math.sqrt(list.length)
+                        weight = 1 / expectedValue
+                        data[key] = weight
+                    })
+
+                    key = "local"
+                    list = results[key]
+                    expectedValue = jStat.median(list) + c*jStat.stdev(list)/ Math.sqrt(list.length)
+                    weight = 1 / expectedValue
+                    data[key] = weight
+
+                    return console.info(JSON.stringify(data))
+                    break;
                 case queryList.mab_duration_seconds:
                     data.status = "success"
 
-                    var t = results.localList.length + results.cloudList.length
+                    t = 0;
+
+                    Object.keys(results).forEach((key) => {
+                        t += results[key].length
+                    })
                     
-                    var localExpectedUCB = getOptionExpectedUCB(t, results.localList)
-                    var cloudExpectedUCB = getOptionExpectedUCB(t, results.cloudList)
+                    rigConfigs.servers.forEach((server) => {
+                        key = server.name
+                        list = results[server.name]
+                        if(list === undefined){
+                            data[key] = null
+                            return
+                        }
 
-                    var localWeight = 1 / localExpectedUCB
-                    var cloudWeight = 1 / cloudExpectedUCB
+                        expectedValue = getOptionExpectedUCB(t, list)
+                        weight = 1 / expectedValue
+                        data[key] = weight
+                    })
 
-                    data.localWeight = localWeight
-                    data.cloudWeight = cloudWeight
+
+                    key = "local"
+                    list = results[key]
+                    expectedValue = getOptionExpectedUCB(t, list)
+                    weight = 1 / expectedValue
+                    data[key] = weight
 
                     return console.info(JSON.stringify(data))
                     break
 
                 case queryList.average_duration_seconds:
-                    localWeight = getAvgDuration(results.localList)
-                    cloudWeight = getAvgDuration(results.cloudList)
+                    data.status = "success"
+                    Object.keys(rigConfigs.servers).forEach((key) => {
+                        data[key] = jStat.mean(results[key])
+                    })
 
-                    returnWeights([localWeight,cloudWeight])
+                    console.info(JSON.stringify(data))
                     break
                 default:
                     data.status = "error 4"
@@ -101,14 +158,6 @@ function handle(req) {
         })
 }
 
-function returnWeights(results) {
-    var body = {}
-    body.status = "success"
-    body.localWeight = results[0]
-    body.cloudWeight = results[1]
-    console.info(JSON.stringify(body))
-}
-
 function getDurations(functionName, query){
     var host = rigConfigs.localUrl + ":" +  rigConfigs.localPort
     var path = "/function/get_duration"
@@ -119,6 +168,7 @@ function getDurations(functionName, query){
     return new Promise(function(resolve, reject){
         switch(query){
             case queryList.mab_duration_seconds: 
+            case queryList.bayesian_ucb:
             case queryList.average_duration_seconds:
                 request.post({url, json: body}, function(err, resp, body) {
                     if (err) {
@@ -126,17 +176,22 @@ function getDurations(functionName, query){
                         resolve(null)
                     } else {
                         if(body.status === "success"){
-                            var localList = body.items
-                                .filter( a => a.environment == "local")
-                                .map(a => a.duration)
+                            var durationsList = {}
 
-                            var cloudList = body.items.
-                                filter( a => a.environment == "cloud").
+                            var list
+                            rigConfigs.servers.forEach((server) => {
+                                list = body.items.
+                                    filter( a => a.environment == server.name).
+                                    map(a => a.duration)
+
+                                durationsList[server.name] = list
+                            })
+
+                            list = body.items.
+                                filter( a => a.environment == "local").
                                 map(a => a.duration)
+                            durationsList.local = list
 
-
-                            var durationsList = {localList: localList,
-                                cloudList:cloudList}
                             return resolve(durationsList)
                         }
                         
@@ -173,16 +228,7 @@ function getMabSumReward(items){
 }
 
 function getMabReward(duration){
-    return -duration
-}
-
-function getAvgDuration(items){
-    var sum = 0;
-    var length = items.length
-    for (var i = 0; i < length; i++){
-        sum += items[i];
-    }
-    return sum/length
+    return 1/(duration)
 }
 
 module.exports = (req,res) => {

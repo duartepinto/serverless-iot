@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.16.3",
+    "jStat": "^1.7.1",
     "request": "^2.85.0"
   },
   "devDependencies": {
