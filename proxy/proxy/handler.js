@@ -51,12 +51,10 @@ function handle(req) {
     var url
     var isLocalPromise = functionDeployed(func)
 
-    isLocalPromise.then((result) =>{
-        console.log(result)
-        if(result){
+        if(environment === "local"){
             makeLocalRequest(func, reqData)
         }else{
-            makeCloudRequest(func, reqData)
+            makeCloudRequest(func, reqData, environment)
         }
     }, (err) => {
         var body = {}
@@ -76,15 +74,15 @@ function makeLocalRequest(func, reqData){
     })
 }
 
-function makeCloudRequest(func, reqData){
-    var url = rigConfigs.serverUrl + ":" + rigConfigs.serverPort
+function makeCloudRequest(func, reqData, server){
+    var url = server.url + ":" + server.port
     var initTime = process.hrtime()
     url += "/" + func.address 
 
     console.log("making cloud request")
 
     request.post({url,json: reqData}, ( function(err,resp,body){
-        responseCloud(err,resp, body, func, reqData, initTime)
+        responseCloud(err,resp, body, func, reqData, server, initTime)
     }))
 }
 
@@ -95,7 +93,7 @@ function responseLocal(err,resp, body,func, initTime){
     return 
 }
 
-function responseCloud(err, resp, body, func , reqData, initTime){
+function responseCloud(err, resp, body, func , reqData, server, initTime){
     if(err){
         if(!func.cloudOnly)
             return makeLocalRequest(func, reqData)
@@ -103,7 +101,7 @@ function responseCloud(err, resp, body, func , reqData, initTime){
             var data = {}
             data.status = "error"
             data.message = "Could not reach the server" + 
-                rigConfigs.serverUrl + ":" + rigConfigs.serverPort + "and execute the cloudOnly request"
+                server.url + ":" + server.port + "and execute the cloudOnly request"
         }
 
     }
@@ -111,12 +109,12 @@ function responseCloud(err, resp, body, func , reqData, initTime){
     
     console.info(JSON.stringify(body))
 
-    sendCloudFunctionTimeElapsed(func,timeElapsed)
+    sendCloudFunctionTimeElapsed(func,timeElapsed, server)
     return 
 }
 
-function sendCloudFunctionTimeElapsed(func, timeElapsed){
-    sendTimeElasped(func,timeElapsed,"cloud")
+function sendCloudFunctionTimeElapsed(func, timeElapsed, server){
+    sendTimeElasped(func,timeElapsed,server.name)
 }
 
 function sendLocalFunctionTimeElapsed(func, timeElapsed){
@@ -156,9 +154,9 @@ function functionDeployed(func){
 
     return new Promise((resolve, reject) => {
         if(cloudDeployConfiguration(func))
-            return resolve(false)
+            return resolve(rigConfigs.servers[0])
         if(localDeployConfiguration(func))
-            return resolve(true)
+            return resolve("local")
         request.post({url, json: reqBody}, (error, response, body) => {
             if(error || body.status !== "success") {
                 return reject(error||body.message)
@@ -168,21 +166,40 @@ function functionDeployed(func){
             console.log(body)
 
             // If one of the weights is null it will random the execution
-            if(body.cloudWeight === null || body.localWeight === null){
-                var rnd = Math.floor(Math.random() * Math.floor(2))
+            var oneNull = false
+            var bodyNumKeys = 0;
 
-                if(rnd === 0){
-                    return resolve(true)
-                }else{
-                    return resolve(false)
+            Object.keys(body).map(function(objectKey, index) {
+                bodyNumKeys++
+                if(body[objectKey] === null){
+                    oneNull = true
+
                 }
-            }
+            })
+
+            if(oneNull){
+                    var rnd = Math.floor(Math.random() * Math.floor(rigConfigs.servers.length +1))
+                    if(rnd > 0){
+                        return resolve(rigConfigs.servers[rnd-1])
+                    }else{
+                        return resolve("local")
+                    }
+
+                }
             
-            if(body.cloudWeight > body.localWeight){
-                return resolve(true)
-            }else{
-                return resolve(false)
-            }
+            var minimumKey = Object.keys(body).reduce((a,b) => body[a] < body[b] ? a : b)
+
+            if(minimumKey === 'local')
+                    return resolve("local")
+
+            rigConfigs.servers.forEach(function(server){
+                if(server.name === minimumKey){
+                    return resolve(server)
+                }
+            })
+
+            return resolve(false,rigConfigs.servers[0])
+            
         })
 
     })
