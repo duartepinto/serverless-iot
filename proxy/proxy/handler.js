@@ -9,8 +9,6 @@ const request = require('request')
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
 
-let weightAlgorithm
-
 function handle(req) {
     var data = {}
     if(req == undefined || req == null){
