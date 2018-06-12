@@ -13,7 +13,7 @@ const queryList = {
     average_duration_seconds :{
         query : "gateway_functions_seconds_sum/gateway_functions_seconds_count"
     },
-    mab_duration_seconds : {
+    ucb1 : {
         querySecondsSum : "gateway_functions_seconds_sum",
         queryCount : "gateway_functions_seconds_count",
     },
@@ -96,7 +96,7 @@ function handle(req) {
 
                     return console.info(JSON.stringify(data))
                     break;
-                case queryList.mab_duration_seconds:
+                case queryList.ucb1:
                     data.status = "success"
 
                     let t = 0;
@@ -159,7 +159,7 @@ function getDurations(functionName, query){
 
     return new Promise(function(resolve, reject){
         switch(query){
-            case queryList.mab_duration_seconds: 
+            case queryList.ucb1: 
             case queryList.bayesian_ucb:
             case queryList.average_duration_seconds:
                 request.post({url, json: body}, function(err, resp, body) {
