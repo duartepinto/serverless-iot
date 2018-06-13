@@ -55,16 +55,16 @@ set -v
 
 for i in `seq 2 $N`
 do
-curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_light","query":"mab_duration_seconds"}'
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_light","query":"ucb1"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_light", "data":{"value": true}}'
 
-curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_heavy","query":"mab_duration_seconds"}'
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_heavy","query":"ucb1"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_heavy", "data":{"value": false}}'
 
-curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_super_heavy","query":"mab_duration_seconds"}'
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_super_heavy","query":"ucb1"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_super_heavy", "data":{"value": true}}'
 
-curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_obese_heavy","query":"mab_duration_seconds"}'
+curl --silent "http://$LOCAL_IP/function/weight_scale" -d '{"func":"func_obese_heavy","query":"ucb1"}'
 curl --silent "http://$LOCAL_IP/function/proxy" -d '{"func":"func_obese_heavy", "data":{"value": false}}'
 
 done
