@@ -78,8 +78,6 @@ function makeCloudRequest(func, reqData, server){
     var initTime = process.hrtime()
     url += "/" + func.address 
 
-    console.log("making cloud request")
-
     request.post({url,json: reqData}, ( function(err,resp,body){
         responseCloud(err,resp, body, func, reqData, server, initTime)
     }))
@@ -160,9 +158,6 @@ function functionDeployed(func){
             if(error || body.status !== "success") {
                 return reject(error||body.message)
             }
-
-            console.log(reqBody)
-            console.log(body)
 
             // If one of the weights is null it will random the execution
             var oneNull = false

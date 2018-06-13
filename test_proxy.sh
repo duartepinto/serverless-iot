@@ -43,7 +43,7 @@ curl --silent "http://$LOCAL_IP/function/func_nodeinfo" -d "" | grep Hostname
 if [ "$CONNECTION" = true ];
 then
     echo "Cloud node info"
-    curl --silent "http://$IP_CLOUD:$PORT_CLOUD/function/func_nodeinfo" -d "" | grep Hostname
+    curl --silent --max-time 5 "http://$IP_CLOUD:$PORT_CLOUD/function/func_nodeinfo" -d "" | grep Hostname
 fi
 
 ############

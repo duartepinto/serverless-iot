@@ -201,8 +201,6 @@ function getDurations(functionName, query){
 function getValueBayesianUCB(list){
     let rewardList = Array.from(list, x => getMabReward(x))
     const c = 10
-    console.log(jStat.median(rewardList))
-    console.log(jStat.stdev(rewardList))
     return jStat.median(rewardList) + c*jStat.stdev(rewardList)/ Math.sqrt(rewardList.length)
 }
 
