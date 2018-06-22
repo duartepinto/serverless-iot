@@ -134,12 +134,12 @@ function getTimeElapsed(initTime){
 
 function cloudDeployConfiguration(func){
     return func.requestOptions.forceCloud === true ||
-        (func.cloudOnly === true && func.requestOptions.forceLocal == false)
+        (func.cloudOnly === true && !func.requestOptions.forceLocal)
 }
 
 function localDeployConfiguration(func){
     return func.requestOptions.forceLocal === true ||
-        (func.localOnly === true && func.requestOptions.forceCloud == false)
+        (func.localOnly === true && !func.requestOptions.forceCloud)
 }
 
 function functionDeployed(func){
