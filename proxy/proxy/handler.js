@@ -133,14 +133,13 @@ function getTimeElapsed(initTime){
 }
 
 function cloudDeployConfiguration(func){
-return func.cloudOnly === true && 
-        func.requestOptions.forceLocal == false || func.requestOptions.forceCloud === true
+    return func.requestOptions.forceCloud === true ||
+        (func.cloudOnly === true && func.requestOptions.forceLocal == false)
 }
 
 function localDeployConfiguration(func){
-
-return func.localOnly === true && 
-        func.requestOptions.forceCloud == false || func.requestOptions.forceLocal === true
+    return func.requestOptions.forceLocal === true ||
+        (func.localOnly === true && func.requestOptions.forceCloud == false)
 }
 
 function functionDeployed(func){
