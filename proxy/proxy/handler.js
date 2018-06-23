@@ -74,11 +74,11 @@ function makeLocalRequest(func, reqData){
 }
 
 function makeCloudRequest(func, reqData, server){
+    var timeout = 10000
     var url = server.url + ":" + server.port
     var initTime = process.hrtime()
     url += "/" + func.address 
-
-    request.post({url,json: reqData}, ( function(err,resp,body){
+    request.post({url, json: reqData, timeout}, ( function(err,resp,body){
         responseCloud(err,resp, body, func, reqData, server, initTime)
     }))
 }
