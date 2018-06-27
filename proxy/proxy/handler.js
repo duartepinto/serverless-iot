@@ -9,7 +9,6 @@ const request = require('request')
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
 
-
 function handle(req) {
     var data = {}
     if(req == undefined || req == null){
@@ -33,7 +32,8 @@ function handle(req) {
         for(var i = 0; i < funcsConfig.length; i++) {
             if(reqFunc == funcsConfig[i].name){
                 func = funcsConfig[i]
-                func.requestOptions = reqOptions
+                func.requestOptions = reqOptions || {}
+
                 break
             }
 
@@ -74,11 +74,11 @@ function makeLocalRequest(func, reqData){
 }
 
 function makeCloudRequest(func, reqData, server){
+    var timeout = 10000
     var url = server.url + ":" + server.port
     var initTime = process.hrtime()
     url += "/" + func.address 
-
-    request.post({url,json: reqData}, ( function(err,resp,body){
+    request.post({url, json: reqData, timeout}, ( function(err,resp,body){
         responseCloud(err,resp, body, func, reqData, server, initTime)
     }))
 }
@@ -133,22 +133,20 @@ function getTimeElapsed(initTime){
 }
 
 function cloudDeployConfiguration(func){
-return func.cloudOnly === true && 
-        (func.requestOptions === undefined || func.requestOptions.forceLocal === false) || 
-            (func.requestOptions !== undefined && func.requestOptions.forceCloud === true)
+    return func.requestOptions.forceCloud === true ||
+        (func.cloudOnly === true && !func.requestOptions.forceLocal)
 }
 
 function localDeployConfiguration(func){
-
-return func.localOnly === true && 
-        (func.requestOptions === undefined || func.requestOptions.forceCloud === false) || 
-            (func.requestOptions !== undefined && func.requestOptions.forceLocal === true )
+    return func.requestOptions.forceLocal === true ||
+        (func.localOnly === true && !func.requestOptions.forceCloud)
 }
 
 function functionDeployed(func){
 
-    var reqBody = { func: func.name, query:"mab_duration_seconds" }
+    var reqBody = { func: func.name, query: func.requestOptions.weightAlgorithm || "ucb1" }
     var url = rigConfigs.localUrl + ":" + rigConfigs.localPort + "/function/weight_scale"
+
 
     return new Promise((resolve, reject) => {
         if(cloudDeployConfiguration(func))
@@ -157,7 +155,7 @@ function functionDeployed(func){
             return resolve("local")
         request.post({url, json: reqBody}, (error, response, body) => {
             if(error || body.status !== "success") {
-                return reject(error)
+                return reject(error||body.message)
             }
 
             // If one of the weights is null it will random the execution

@@ -5,6 +5,7 @@
 'use strict';
 
 const request = require('request')
+const jStat = require('jStat').jStat;
 
 const funcsConfig = require('./my_functions.json')
 const rigConfigs = require('./my_rig_config.json')
@@ -12,9 +13,11 @@ const queryList = {
     average_duration_seconds :{
         query : "gateway_functions_seconds_sum/gateway_functions_seconds_count"
     },
-    mab_duration_seconds : {
+    ucb1 : {
         querySecondsSum : "gateway_functions_seconds_sum",
         queryCount : "gateway_functions_seconds_count",
+    },
+    bayesian_ucb: {
     }
 }
 
@@ -64,18 +67,12 @@ function handle(req) {
     weightPromise 
         .then((results) =>{ 
             switch(query){
-                case queryList.mab_duration_seconds:
+                case queryList.bayesian_ucb:
                     data.status = "success"
 
-                    var t = 0;
-
-                    Object.keys(results).forEach((key) => {
-                        t += results[key].length
-                    })
-                    
                     var key 
                     var list
-                    var expectedUCB
+                    var expectedValue
                     var weight
 
                     rigConfigs.servers.forEach((server) => {
@@ -86,16 +83,46 @@ function handle(req) {
                             return
                         }
 
-                        expectedUCB = getOptionExpectedUCB(t, list)
-                        weight = 1 / expectedUCB
+                        expectedValue = getValueBayesianUCB(list)
+                        weight = 1 / expectedValue
+                        data[key] = weight
+                    })
+
+                    key = "local"
+                    list = results[key]
+                    expectedValue = getValueBayesianUCB(list)
+                    weight = 1 / expectedValue
+                    data[key] = weight
+
+                    return console.info(JSON.stringify(data))
+                    break;
+                case queryList.ucb1:
+                    data.status = "success"
+
+                    let t = 0;
+
+                    Object.keys(results).forEach((key) => {
+                        t += results[key].length
+                    })
+                    
+                    rigConfigs.servers.forEach((server) => {
+                        key = server.name
+                        list = results[server.name]
+                        if(list === undefined){
+                            data[key] = null
+                            return
+                        }
+
+                        expectedValue = getValueUCB1(t, list)
+                        weight = 1 / expectedValue
                         data[key] = weight
                     })
 
 
                     key = "local"
                     list = results[key]
-                    expectedUCB = getOptionExpectedUCB(t, list)
-                    weight = 1 / expectedUCB
+                    expectedValue = getValueUCB1(t, list)
+                    weight = 1 / expectedValue
                     data[key] = weight
 
                     return console.info(JSON.stringify(data))
@@ -104,7 +131,7 @@ function handle(req) {
                 case queryList.average_duration_seconds:
                     data.status = "success"
                     Object.keys(rigConfigs.servers).forEach((key) => {
-                        data[key] = getAvgDuration(results[key])
+                        data[key] = jStat.mean(results[key])
                     })
 
                     console.info(JSON.stringify(data))
@@ -132,7 +159,8 @@ function getDurations(functionName, query){
 
     return new Promise(function(resolve, reject){
         switch(query){
-            case queryList.mab_duration_seconds: 
+            case queryList.ucb1: 
+            case queryList.bayesian_ucb:
             case queryList.average_duration_seconds:
                 request.post({url, json: body}, function(err, resp, body) {
                     if (err) {
@@ -170,38 +198,26 @@ function getDurations(functionName, query){
     })
 }
 
-function getOptionExpectedUCB(t, rewardList){
-    return getExpectedReward(rewardList) + getUCB1(t, rewardList.length)
+function getValueBayesianUCB(list){
+    let rewardList = Array.from(list, x => getMabReward(x))
+    const c = 10
+    return jStat.median(rewardList) + c*jStat.stdev(rewardList)/ Math.sqrt(rewardList.length)
 }
 
-function getUCB1(t, nTrialsOption){
+function getValueUCB1(t, rewardList){
+    return getExpectedReward(rewardList) + getUpperBoundUCB1(t, rewardList.length)
+}
+
+function getUpperBoundUCB1(t, nTrialsOption){
     return Math.sqrt(2*Math.log(t)/nTrialsOption)
 }
 
 function getExpectedReward(rewardList){
-    return 1/(rewardList.length) * getMabSumReward(rewardList)
-}
-
-function getMabSumReward(items){
-    var sum = 0; 
-    for(var i = 0; i < items.length; i++){
-        sum += getMabReward(items[i])
-    }
-
-    return sum
+    return 1/(rewardList.length) * jStat.sum(Array.from(rewardList, x => getMabReward(x)))
 }
 
 function getMabReward(duration){
     return 1/(duration)
-}
-
-function getAvgDuration(items){
-    var sum = 0;
-    var length = items.length
-    for (var i = 0; i < length; i++){
-        sum += items[i];
-    }
-    return sum/length
 }
 
 module.exports = (req,res) => {

@@ -7,6 +7,10 @@ functions:
     lang: node
     handler: ./proxy/proxy
     image: proxy/proxy
+    environment:
+      write_timeout: 45
+      read_timeout: 45
+      #exec_timeout: 20
     build:
         extra-files:
             from: .config/my_functions.json
